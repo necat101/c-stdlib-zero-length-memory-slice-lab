@@ -1,0 +1,2018 @@
+[
+  {
+    "id": 42387013,
+    "by": "gslin",
+    "parent": null,
+    "time": 1733919552,
+    "type": "story",
+    "text": ""
+  },
+  {
+    "id": 42387178,
+    "by": "whytevuhuni",
+    "parent": 42387013,
+    "time": 1733921028,
+    "type": "comment",
+    "text": "How interesting. GCC does indeed remove that branch.<p><a href=\"https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;aPcr1bfPe\" rel=\"nofollow\">https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;aPcr1bfPe</a>"
+  },
+  {
+    "id": 42387928,
+    "by": "badmintonbaseba",
+    "parent": 42387013,
+    "time": 1733926837,
+    "type": "comment",
+    "text": "I just skimmed through the proposed wording in [N3322]. It looks like it silently fixes a defect too, NULL == NULL was also undefined up until C23. Hilarious.<p>[N3322] <a href=\"https:&#x2F;&#x2F;www.open-std.org&#x2F;jtc1&#x2F;sc22&#x2F;wg14&#x2F;www&#x2F;docs&#x2F;n3322.pdf\" rel=\"nofollow\">https:&#x2F;&#x2F;www.open-std.org&#x2F;jtc1&#x2F;sc22&#x2F;wg14&#x2F;www&#x2F;docs&#x2F;n3322.pdf</a>"
+  },
+  {
+    "id": 42387102,
+    "by": "voidUpdate",
+    "parent": 42387013,
+    "time": 1733920434,
+    "type": "comment",
+    "text": "I feel like I&#x27;ve misunderstood something here... shouldn&#x27;t memcpy(anything, anything, 0) just do nothing, because you&#x27;re copying 0 bytes?"
+  },
+  {
+    "id": 42393030,
+    "by": "nmilo",
+    "parent": 42387013,
+    "time": 1733951531,
+    "type": "comment",
+    "text": "&gt; However, the most vocal opposition came from a static analysis perspective: Making null pointers well-defined for zero length means that static analyzers can no longer unconditionally report NULL being passed to functions like memcpy\u2014they also need to take the length into account now.<p>How does this make any sense? We don&#x27;t want to remove a low hanging footgun because static analyzers can no longer detect it?"
+  },
+  {
+    "id": 42387807,
+    "by": "MrMcCall",
+    "parent": 42387013,
+    "time": 1733926115,
+    "type": "comment",
+    "text": "Isn&#x27;t it more sensible to just check that the params that are about to be sent to memcpy be reasonable?<p>That is why I tend to wrap my system calls with my own internal function (which can be inlined in certain PLs), where I can standardize such tests. Otherwise, the resulting code that performs the checks and does the requisite error handling is bloated.<p>Note that I am also loath to #DEFINE such code because C is already rife with them and my perspective is that the less of them the better.<p>At the end of the day, quick and dirty fixes will prove the adage &quot;short cuts make long delays&quot;, and OpenBSD&#x27;s approach is the only really viable long-term solution, where you just have to rewrite your code if it has ill-advised constructs.<p>For designing libraries such as C&#x27;s stdlib, I don&#x27;t believe in &#x27;undefined behavior&#x27;, clearly define your semantics and say, &quot;If you pass a NULL to memcpy, this is what will happen.&quot; Same for providing a (n == 0), or should (src == dst).<p>And if, for some strange reason, fixing the semantics breaks calling code, then I can&#x27;t imagine that their code wasn&#x27;t f_cked in the first place."
+  },
+  {
+    "id": 42387515,
+    "by": "ape4",
+    "parent": 42387013,
+    "time": 1733924116,
+    "type": "comment",
+    "text": "Only about 1000 more functions to do this to."
+  },
+  {
+    "id": 42388443,
+    "by": "hwc",
+    "parent": 42387013,
+    "time": 1733929541,
+    "type": "comment",
+    "text": "Well, that seems like something that should have been there from the beginning ."
+  },
+  {
+    "id": 42388325,
+    "by": "MuffinFlavored",
+    "parent": 42387013,
+    "time": 1733928913,
+    "type": "comment",
+    "text": "&gt; because NULL + 0 is undefined behavior in C.<p>Why? It&#x27;s 2024. Make it not be? Sure, some older stuff already written might no longer compile and need to be updated. Put it behind a &quot;newer&quot; standard flag&#x2F;version or whatever.<p>Or is it that it can&#x27;t be caught at compile time and only run time... hmm..."
+  },
+  {
+    "id": 42387581,
+    "by": "high_na_euv",
+    "parent": 42387013,
+    "time": 1733924511,
+    "type": "comment",
+    "text": "&gt;On the one hand, UB can be important for compiler optimizations<p>e.g?"
+  },
+  {
+    "id": 42387116,
+    "by": "guerrilla",
+    "parent": 42387013,
+    "time": 1733920539,
+    "type": "comment",
+    "text": "[flagged]"
+  },
+  {
+    "id": 42390556,
+    "by": "ndesaulniers",
+    "parent": 42387178,
+    "time": 1733939465,
+    "type": "comment",
+    "text": "&gt; For example, GCC will happily remove the dest == NULL branch in the following code<p>I think the blog should mention `-fno-delete-null-pointer-checks`<p><a href=\"https:&#x2F;&#x2F;gcc.gnu.org&#x2F;onlinedocs&#x2F;gcc&#x2F;Optimize-Options.html#index-fdelete-null-pointer-checks\" rel=\"nofollow\">https:&#x2F;&#x2F;gcc.gnu.org&#x2F;onlinedocs&#x2F;gcc&#x2F;Optimize-Options.html#ind...</a>"
+  },
+  {
+    "id": 42388713,
+    "by": "mjg59",
+    "parent": 42387178,
+    "time": 1733930927,
+    "type": "comment",
+    "text": "Explanation for the above: passing NULL as the destination argument to memcpy() is undefined behaviour at present. gcc assumes that the fact that memcpy() is called therefore means that the destination argument can&#x27;t be NULL, so &quot;knows&quot; that the dest == NULL check can never be true, and so removes the test and the do_thing1() branch entirely.<p>Interestingly, replacing len in the memcpy() call results in gcc instead removing the memcpy() call and retaining the check - presumably a different optimisation routine decides that it&#x27;s a no-op in that case. <a href=\"https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;cPdx6v13r\" rel=\"nofollow\">https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;cPdx6v13r</a> is, therefore, interesting - despite this only ever calling test() with a len of 0, the elision of the dest == NULL check is still there, but test() has been inlined <i>without</i> the memcpy (because len == 0) but <i>with</i> do_thing2() (because the behaviour is undefined and so it can assume dest isn&#x27;t NULL even though there&#x27;s a NULL literally right there!)<p>Fucking compilers, man."
+  },
+  {
+    "id": 42388309,
+    "by": "mananaysiempre",
+    "parent": 42387928,
+    "time": 1733928843,
+    "type": "comment",
+    "text": "This is probably related to the issue with NULL - NULL mentioned in the article.<p>Imagine you\u2019re working in real mode on x86, in the compact or large memory model[1]. This means that a data pointer is basically struct{uint16_t off,seg;} encoding linear address (seg&lt;&lt;4)+off. This makes it annoying to have individual allocations (\u201cobjects\u201d) &gt;64K in size (because of the weird carries), so these models don\u2019t allow that. (The huge model does, and it\u2019s significantly slower.) Thus you legitimately have sizeof(size_t) == 2 but sizeof(uintptr_t) == 4 (hi Rust), and God help you if you compare or subtract pointers not within the same allocation. [Also, sizeof(void *) == 4 but sizeof(void (*)(void)) == 2 in the compact model, and the other way around in the medium model.]<p>Note the addressing scheme is non-bijective. The C standard is generally careful not to require the implementation to canonicalize pointers: if, say, char a[16] happens to be immediately followed by int b[8], an independently declared variable, it may well be that &amp;a+16 (legal \u201cone past\u201d pointer) is {16,1} but &amp;b is {0,2}, which refers to the exact same byte, but the compiler doesn\u2019t have to do anything special because dereferencing &amp;a+16 is UB (duh) and comparing (char *)(&amp;a+16) with (char *)&amp;b or subtracting one from the other is also UB (pointers to different objects).<p>The issue with NULL == NULL and also with NULL - NULL is that now the null pointer is required to be canonical, or these expressions must canonicalize their operands. I don\u2019t know why you\u2019d ever make an implementation that has non-canonical NULLs, but I guess the text prior to this change allowed such.<p>[1] <a href=\"https:&#x2F;&#x2F;devblogs.microsoft.com&#x2F;oldnewthing&#x2F;20200728-00&#x2F;?p=104012\" rel=\"nofollow\">https:&#x2F;&#x2F;devblogs.microsoft.com&#x2F;oldnewthing&#x2F;20200728-00&#x2F;?p=10...</a>"
+  },
+  {
+    "id": 42388491,
+    "by": "pm215",
+    "parent": 42387928,
+    "time": 1733929825,
+    "type": "comment",
+    "text": "If so, it&#x27;s one that&#x27;s been introduced at some point post C99 -- the C99 spec explicitly defines the behaviour of NULL == NULL. Section 6.5.9 para 6 says &quot;Two pointers compare equal if and only if both are null pointers, both are pointers to the same object [etc etc]&quot;."
+  },
+  {
+    "id": 42388985,
+    "by": "nikic",
+    "parent": 42387928,
+    "time": 1733932361,
+    "type": "comment",
+    "text": "NULL == NULL was already defined -- but NULL &lt;= NULL wasn&#x27;t :)"
+  },
+  {
+    "id": 42389367,
+    "by": "IWeldMelons",
+    "parent": 42387928,
+    "time": 1733934138,
+    "type": "comment",
+    "text": "Cannot find any confirmation to your statement. Otoh &quot;All null pointer values (of compatible typewithin the same address space) are already required to compare equal. &quot; in the limked paper."
+  },
+  {
+    "id": 42387125,
+    "by": "mjg59",
+    "parent": 42387102,
+    "time": 1733920646,
+    "type": "comment",
+    "text": "That&#x27;s a reasonable intuitive interpretation of how it <i>should</i> behave, but according to the spec it&#x27;s undefined behaviour and compilers have a great degree of freedom in what happens as a result."
+  },
+  {
+    "id": 42387254,
+    "by": "bluetomcat",
+    "parent": 42387102,
+    "time": 1733921717,
+    "type": "comment",
+    "text": "A trivial implementation wouldn&#x27;t dereference dest or src in case the length is 0. That&#x27;s how a student would write it with a for loop (byte-by-byte copy). A non-trivial implementation might do something with the pointers before entering the copy loop."
+  },
+  {
+    "id": 42387175,
+    "by": "pkhuong",
+    "parent": 42387102,
+    "time": 1733920997,
+    "type": "comment",
+    "text": "It does nothing, but is only defined when the pointers point into or one past the end of valid objects (live allocations), because that&#x27;s how the standard defines the C VM, in terms of objects, not a flat byte array."
+  },
+  {
+    "id": 42392885,
+    "by": "ryao",
+    "parent": 42387102,
+    "time": 1733950681,
+    "type": "comment",
+    "text": "I have asked this question in the past and was told that memcpy() is allowed to preemptively read before it has determined it needs to write to make it faster on some CPUs. The presumption is that if you are going to be copying data, there is at least one cache line there already, so reading can start early."
+  },
+  {
+    "id": 42387131,
+    "by": "rcxdude",
+    "parent": 42387102,
+    "time": 1733920675,
+    "type": "comment",
+    "text": "Purely mechanically, yes, but in terms of the definition of the behaviour in the C abstract machine, no, because certain operations on null pointers are undefined, even if the obvious low-level compilation turns into nothing."
+  },
+  {
+    "id": 42387170,
+    "by": "IcePic",
+    "parent": 42387102,
+    "time": 1733920951,
+    "type": "comment",
+    "text": "&quot;man bcopy&quot; on BSD:<p>&#x27;If len is zero, no bytes are copied.&#x27;<p>Seems reasonable."
+  },
+  {
+    "id": 42388469,
+    "by": "ryukoposting",
+    "parent": 42387102,
+    "time": 1733929670,
+    "type": "comment",
+    "text": "Yes and no.<p>No, because ISO never said it <i>must</i> behave this way.<p>Yes, because every libc I&#x27;ve personally encountered acts this way. At a glance, glibc&#x27;s x86 implementation[1, 2], musl, and picolibc all handle 0-length memcpy as you&#x27;d expect.\nI&#x27;m sure other folks could dig up the code for Newlib, uclibc, and others, and they&#x27;d see the same thing.<p>On a related note, ISO C has THREE different things that most people tend to lump together as &quot;undefined behavior.&quot; They are:<p>Implementation-defined behavior: ISO doesn&#x27;t require any particular behavior, but they <i>do</i> require implementations to consistently apply a particular behavior, and document that behavior.<p>Unspecified behavior: ISO doesn&#x27;t require any particular behavior, but they <i>do</i> require implementations to consistently use a particular behavior, but they <i>don&#x27;t</i> require that behavior to be documented.<p>Undefined behavior: ISO doesn&#x27;t require any particular behavior, and they don&#x27;t require implementations to define any particular behavior either.<p>[1]: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;lattera&#x2F;glibc&#x2F;blob&#x2F;master&#x2F;string&#x2F;memcpy.c\">https:&#x2F;&#x2F;github.com&#x2F;lattera&#x2F;glibc&#x2F;blob&#x2F;master&#x2F;string&#x2F;memcpy.c</a>\n[2]: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;lattera&#x2F;glibc&#x2F;blob&#x2F;895ef79e04a953cac1493863bcae29ad85657ee1&#x2F;sysdeps&#x2F;i386&#x2F;memcopy.h#L26\">https:&#x2F;&#x2F;github.com&#x2F;lattera&#x2F;glibc&#x2F;blob&#x2F;895ef79e04a953cac14938...</a>"
+  },
+  {
+    "id": 42394514,
+    "by": "sfink",
+    "parent": 42393030,
+    "time": 1733961463,
+    "type": "comment",
+    "text": "No, it means the static analyzers can&#x27;t report on a <i>different</i> error because a subset of that class of errors is no longer an error, and the static analysis can&#x27;t usually distinguish between that subset and the rest.<p><pre><code>    memcpy(NULL, NULL, 0); &#x2F;&#x2F; Formerly bad, now ok.\n    memcpy(NULL, NULL, s); &#x2F;&#x2F; Formerly bad, now unknown (unless it can be proven that s != 0).</code></pre>\nand<p><pre><code>    memcpy(NULL, b, c); &#x2F;&#x2F; Same issue.\n</code></pre>\n(where &quot;NULL&quot; == &quot;statically known to be NULL&quot;, not necessarily just a literal NULL. Not that that changes the difficulty here.)<p>Previously: warn if either address might be NULL.<p>Now: warn if either address might be NULL <i>and</i> the length might be nonzero, and prepare for your users to be annoyed and shut this warning off due to the false alarms.<p>Any useful static analysis tool does a careful balance between false positives and false negatives (aka false alarms and missed bugs). Too many false positives, and that warning will be disabled, or users will get used to ignoring it, or it will be routinely annotated away at call sites without anyone bothering to figure out whether it&#x27;s valid or not. Soon the tool will cease to be useful and may be entirely abandoned. In actual practice, the sophistication of a static analysis tool is far less relevant than its precision. It&#x27;s quite common to have an incredibly powerful static analysis tool that is used for only a small handful of blazingly obvious warnings, sometimes ones that the compiler already has implemented! (All the tool&#x27;s fancy warnings got disabled one by one and nobody noticed.)"
+  },
+  {
+    "id": 42393179,
+    "by": "hatthew",
+    "parent": 42393030,
+    "time": 1733952476,
+    "type": "comment",
+    "text": "My understanding is that with this change, static analyzers have three options:<p>1. False positive on code that would have been an issue previously<p>2. False negative on a ton of similar footguns<p>3. Add complexity to differentiate between these cases<p>None of these options are fun."
+  },
+  {
+    "id": 42388475,
+    "by": "hwc",
+    "parent": 42387807,
+    "time": 1733929716,
+    "type": "comment",
+    "text": "&gt; internal function<p>every time you introduce something nonstandard, you add one little hardship to anyone trying to read or modify your code.<p>if a programmer is familiar with the language, it&#x27;s standard library, and the normal idioms, then they should be able to just jump in."
+  },
+  {
+    "id": 42392992,
+    "by": "int_19h",
+    "parent": 42387807,
+    "time": 1733951299,
+    "type": "comment",
+    "text": "As the article points out, all major memcpy implementations already do this check inside memcpy. Sure, the caller can also check, but given that it&#x27;s both redundant in practice and makes some common patterns harder to use than they would otherwise be, there&#x27;s no reason to not just standardize what&#x27;s already happening anyway and make everyone&#x27;s lives easier in the process."
+  },
+  {
+    "id": 42388918,
+    "by": "sophiebits",
+    "parent": 42388325,
+    "time": 1733931987,
+    "type": "comment",
+    "text": "They are making it not be. That\u2019s the whole point of the article."
+  },
+  {
+    "id": 42387834,
+    "by": "GuB-42",
+    "parent": 42387581,
+    "time": 1733926295,
+    "type": "comment",
+    "text": "Generally, undefined behavior removes the need for systematically checking for special cases, the most common being out of bounds access.<p>But it can go further than that. Dereferencing a NULL pointer is undefined behavior, so if a pointer is dereferenced, it can be assumed by the compiler not to be NULL and the code can be optimized. For example:<p><pre><code>  void foo(int *p) {\n    *p++;\n    if (p == NULL) {\n      printf(&quot;val is NULL\\n&quot;);\n    } else {\n      printf(&quot;val is %d\\n&quot;, *p);\n    }\n  }\n</code></pre>\ncan be optimized to:<p><pre><code>  void foo(int *p) {\n    *p++;\n    printf(&quot;val is %d\\n&quot;, *p);\n  }\n</code></pre>\nNote that static analyzers will most likely issue a warning here as such a trivial case is most likely a mistake. But the check for NULL may be part of an inline function that is used in many places, and thanks to the undefined behavior, the code that handles the NULL case will only be generated when relevant. The problem, of course, is that it assumes that the programmer knows what he is doing and doesn&#x27;t make mistakes.<p>In the case of memcpy(NULL, NULL, 0), there probably isn&#x27;t much to gain making it undefined. It most likely doesn&#x27;t help with the memcpy implementation (len=0 is a generally no-op), and inference based on the fact that the arguments can&#x27;t be NULL is more likely to screw the programmer up than to improve performance."
+  },
+  {
+    "id": 42387666,
+    "by": "cesarb",
+    "parent": 42387581,
+    "time": 1733925133,
+    "type": "comment",
+    "text": "The simplest example of a compiler optimization enabled by UB would be the following:<p><pre><code>  int my_function() {\n    int x = 1;\n    another_function();\n    return x;\n  }\n</code></pre>\nThe compiler can optimize that to:<p><pre><code>  int my_function() {\n    another_function();\n    return 1;\n  }\n</code></pre>\nBecause it&#x27;s UB for another_function() to use an out-of-bounds pointer to access the stack of my_function() and modify the value of x.<p>And the most important example of a compiler optimization enabled by UB is related to that: being UB to access local variables through out-of-bounds pointers allows the compiler to place them in registers, instead of being forced to go through the stack for every operation."
+  },
+  {
+    "id": 42387680,
+    "by": "rwmj",
+    "parent": 42387581,
+    "time": 1733925222,
+    "type": "comment",
+    "text": "This explanation of why signed int overflow is undefined is interesting (although the behaviour is still very annoying): <a href=\"https:&#x2F;&#x2F;kristerw.blogspot.com&#x2F;2016&#x2F;02&#x2F;how-undefined-signed-overflow-enables.html\" rel=\"nofollow\">https:&#x2F;&#x2F;kristerw.blogspot.com&#x2F;2016&#x2F;02&#x2F;how-undefined-signed-o...</a>  (HN discussion: <a href=\"https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=11146384\">https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=11146384</a>)<p>More examples here: <a href=\"http:&#x2F;&#x2F;blog.llvm.org&#x2F;2011&#x2F;05&#x2F;what-every-c-programmer-should-know.html\" rel=\"nofollow\">http:&#x2F;&#x2F;blog.llvm.org&#x2F;2011&#x2F;05&#x2F;what-every-c-programmer-should-...</a>"
+  },
+  {
+    "id": 42387744,
+    "by": "Arch-TK",
+    "parent": 42387581,
+    "time": 1733925677,
+    "type": "comment",
+    "text": "<a href=\"http:&#x2F;&#x2F;blog.llvm.org&#x2F;2011&#x2F;05&#x2F;what-every-c-programmer-should-know.html\" rel=\"nofollow\">http:&#x2F;&#x2F;blog.llvm.org&#x2F;2011&#x2F;05&#x2F;what-every-c-programmer-should-...</a><p>In a real world program removing all UB is some cases impossible without adding new breaking features to the C language. But, taking a real world program and removingh all UB which IS possible to remove will introduce an overhead. In some programs this overhead is irrelevant. In others, it is probably the reason why C was picked.<p>If you want speed without overhead, you need to have more statically checked guarantees. This is what languages such as Rust attempt to achieve (quite successfully)."
+  },
+  {
+    "id": 42387648,
+    "by": "cwzwarich",
+    "parent": 42387581,
+    "time": 1733924992,
+    "type": "comment",
+    "text": "The example in this blurb is a pretty good one: <a href=\"https:&#x2F;&#x2F;www.hboehm.info&#x2F;c++mm&#x2F;why_undef.html\" rel=\"nofollow\">https:&#x2F;&#x2F;www.hboehm.info&#x2F;c++mm&#x2F;why_undef.html</a>"
+  },
+  {
+    "id": 42387234,
+    "by": "bla3",
+    "parent": 42387116,
+    "time": 1733921568,
+    "type": "comment",
+    "text": "It&#x27;s a big jump from &quot;this behavior annoys me&quot; to &quot;I hate a person&quot;."
+  },
+  {
+    "id": 42387599,
+    "by": "redleader55",
+    "parent": 42387116,
+    "time": 1733924661,
+    "type": "comment",
+    "text": "Not only on your phone. It does the same on my laptop on Firefox."
+  },
+  {
+    "id": 42387252,
+    "by": "gsck",
+    "parent": 42387116,
+    "time": 1733921714,
+    "type": "comment",
+    "text": "Yeah its fine updating the url, but adding history checkpoints really does suck"
+  },
+  {
+    "id": 42387356,
+    "by": "1kaizen",
+    "parent": 42387116,
+    "time": 1733922700,
+    "type": "comment",
+    "text": "[flagged]"
+  },
+  {
+    "id": 42393073,
+    "by": "AceJohnny2",
+    "parent": 42390556,
+    "time": 1733951842,
+    "type": "comment",
+    "text": "&gt; <i>-fdelete-null-pointer-checks</i><p>&gt; [...]<p>&gt; <i>This option is enabled by default on most targets.</i><p>What a footgun.<p>I understand that, in an effort to compete with other compilers for relevance, GCC pursued performance over safety. Has that era passed? Could GCC choose safer over fast?<p>Alternatively, has someone compiled a list of flags one might want to enable in latest GCC to avoid such kinds of dangerous optimizations?"
+  },
+  {
+    "id": 42390363,
+    "by": "jpollock",
+    "parent": 42388713,
+    "time": 1733938593,
+    "type": "comment",
+    "text": "How does gcc infer anything about memcpy? Can&#x27;t I replace the c-library memcpy with my own, so how does it know that dest == NULL can never be true?"
+  },
+  {
+    "id": 42399526,
+    "by": "mpweiher",
+    "parent": 42388713,
+    "time": 1734014691,
+    "type": "comment",
+    "text": "&gt;  that memcpy() is called therefore means that the destination argument can&#x27;t be NULL<p>The whole idea that undefined behavior cannot happen and you can therefore do optimization based on &quot;knowing&quot; it cannot happen is incredibly bonkers."
+  },
+  {
+    "id": 42390161,
+    "by": "nayuki",
+    "parent": 42388713,
+    "time": 1733937595,
+    "type": "comment",
+    "text": "&gt; Fucking compilers, man.<p>They&#x27;re just acting as agents that derive the logical consequences of the code.<p>The fact that the given example code is &quot;surprising&quot; is analogous to this mathematical derivation:<p><pre><code>    a = b\n    a*a = b*a\n    a*a - b*b = b*a - b*b\n    (a - b)(a + b) = b(a - b)\n    (a - b)(a + b)&#x2F;(a - b) = b(a - b)&#x2F;(a - b)\n    ^ Divide by 0, undefined behavior!\n    Everything below is not necessarily true.\n    a + b = b\n    b + b = b\n    2b = b\n    2 = 1\n    2 - 1 = 1 - 1\n    1 = 0\n</code></pre>\nThe source of truth about what is&#x2F;isn&#x27;t allowed is the C standard, not your personal simplified model of it that may contain dangerous misconceptions. The fact that your mental model doesn&#x27;t match the document is an education problem, not a problem with the compiler."
+  },
+  {
+    "id": 42389949,
+    "by": "amluto",
+    "parent": 42388309,
+    "time": 1733936634,
+    "type": "comment",
+    "text": "&gt; now the null pointer is required to be canonical<p>Yikes!  This particular oddity seems annoying but sort of harmless in x86 real mode, but not necessarily in protected mode. Imagine code that wants to load a pointer into a register: it loads the offset into an ordinary register and the selector portion into a segment register. It\u2019s permissible to load the 0 (null) selector, but loading garbage will fault immediately. So, if you allow non canonical NULL, then knowing that a pointer is either valid or NULL does not allow you to hoist a segment load above a condition that might mean you never actually dereference the pointer.<p>(I have plenty of experience with low-level OS code in all kinds of nasty x86 modes but, thankfully, not so much experience writing ordinary C code targeting protected mode. It sometimes boggles my mind that anyone ever got decent performance with anything involving far data pointers. Segment loads are slow, and there are not a lot of segment registers to go around.)"
+  },
+  {
+    "id": 42392391,
+    "by": "dwattttt",
+    "parent": 42388491,
+    "time": 1733948142,
+    "type": "comment",
+    "text": "I don&#x27;t imagine NULL is defined as &quot;pointing to an object&quot;, so I don&#x27;t expect that clause to apply."
+  },
+  {
+    "id": 42397712,
+    "by": "badmintonbaseba",
+    "parent": 42388985,
+    "time": 1733996357,
+    "type": "comment",
+    "text": "My mistake."
+  },
+  {
+    "id": 42393527,
+    "by": "PaulDavisThe1st",
+    "parent": 42389367,
+    "time": 1733954752,
+    "type": "comment",
+    "text": "NULL is not single type in any conventional sense (and is actually tricky to define in a way that makes it usable in the way most programmers expect).<p>Thus:<p><pre><code>  T1* a = NULL;\n  T2* b = NULL\n  a == b; &#x2F;* may be undefined at present, depending on the nature of T1 &amp; T2 *&#x2F;</code></pre>"
+  },
+  {
+    "id": 42387419,
+    "by": "david-gpu",
+    "parent": 42387125,
+    "time": 1733923261,
+    "type": "comment",
+    "text": "More information on this behavior in the link below.<p><i>&gt; Note that, apart from contrived examples with deleted null checks, the current rules do not actually help the compiler meaningfully optimize code. A memcpy implementation cannot rely on pointer validity to speculatively read because, even though memcpy(NULL, NULL, 0) is undefined, slices at the end of a buffer are fine. [And if the end of the buffer] were at the end of a page with nothing allocated afterwards, a speculative read from memcpy would break</i><p><a href=\"https:&#x2F;&#x2F;davidben.net&#x2F;2024&#x2F;01&#x2F;15&#x2F;empty-slices.html\" rel=\"nofollow\">https:&#x2F;&#x2F;davidben.net&#x2F;2024&#x2F;01&#x2F;15&#x2F;empty-slices.html</a>"
+  },
+  {
+    "id": 42387160,
+    "by": "voidUpdate",
+    "parent": 42387125,
+    "time": 1733920898,
+    "type": "comment",
+    "text": "Why didn&#x27;t they just... define it, back when they wrote it?"
+  },
+  {
+    "id": 42392072,
+    "by": "captainmuon",
+    "parent": 42387125,
+    "time": 1733946800,
+    "type": "comment",
+    "text": "I feel strongly they should split undefined behavior in behavior that is not defined, and things that the compiler is allowed to assume. The former basically already exists as &quot;implementation defined behavior&quot;. The latter should be written out explicitly in the documentation:<p>&gt; memcpy(dest, src, count)<p>&gt; Copies count bytes from src to dest. [...] Note this is not a plain function, but a special form that \napplies the constraints dest != NULL and src != NULL to the surrounding scope. Equivalent to:<p><pre><code>    assume(dest != NULL)\n    assume(src != NULL)\n    actual_memcpy(dest, src, count)\n</code></pre>\nThe conflation of both concepts breaks the mental model of many programmers, especially ones who learned C&#x2F;C++ in the 90s where it was common to write very different code, with all kinds of now illegal things like type punning and checking this != NULL.<p>I&#x27;d love to have a flag &quot;-fno-surprizing-ub&quot; or &quot;-fhighlevel-assembler&quot; <i>combined</i> with the above `assume` function or some other syntax to let me help the compiler, so that I can write C like in the 90s - close to metal but with less surprizes."
+  },
+  {
+    "id": 42388957,
+    "by": "jancsika",
+    "parent": 42387125,
+    "time": 1733932204,
+    "type": "comment",
+    "text": "I get that for the library. But I&#x27;m a bit puzzled about the optimizations done by a compiler based on this behavior.<p>E.g., suppose we patch GCC to preserve any conditional containing the string &#x27;NULL&#x27; in it. Would that have a measurable performance impact on Linux&#x2F;Chromium&#x2F;Firefox?"
+  },
+  {
+    "id": 42388002,
+    "by": "xbar",
+    "parent": 42387125,
+    "time": 1733927273,
+    "type": "comment",
+    "text": "Upon which some people may rely..."
+  },
+  {
+    "id": 42387223,
+    "by": "whytevuhuni",
+    "parent": 42387175,
+    "time": 1733921429,
+    "type": "comment",
+    "text": "What if the objects are non-NULL, but invalid (not actually allocated)?<p>For example, Rust will use address 1 with length 0 for static empty strings, because 1 is a properly aligned non-null pointer.<p>I would imagine such strings end up being passed to C code sometimes, which may end up calling memcpy with a length of 0 on them."
+  },
+  {
+    "id": 42387349,
+    "by": "codedokode",
+    "parent": 42387131,
+    "time": 1733922606,
+    "type": "comment",
+    "text": "Maybe we should get rid of &quot;abstract machine&quot; and treat pointers as memory addresses?"
+  },
+  {
+    "id": 42394752,
+    "by": "crest",
+    "parent": 42387170,
+    "time": 1733963197,
+    "type": "comment",
+    "text": "As I understand that doesn&#x27;t imply that it&#x27;s <i>not</i> undefined to pass NULL pointers. While not what most users expect&#x2F;want it&#x27;s possible to this is just a wrapper around an memcpy() which will only be correct to call with valid destination and source pointers even if the length is zero."
+  },
+  {
+    "id": 42394234,
+    "by": "nitwit005",
+    "parent": 42393179,
+    "time": 1733959471,
+    "type": "comment",
+    "text": "Yes, but that tradeoff exists for most things those tools do. If you can easily and perfectly detect an error, it should just go into the compiler (and perhaps language spec)."
+  },
+  {
+    "id": 42387873,
+    "by": "high_na_euv",
+    "parent": 42387834,
+    "time": 1733926492,
+    "type": "comment",
+    "text": "But how much actual performance is gained here?"
+  },
+  {
+    "id": 42387856,
+    "by": "MrMcCall",
+    "parent": 42387666,
+    "time": 1733926426,
+    "type": "comment",
+    "text": "I don&#x27;t find those compelling reasons and, to the contrary, I think that kind of semantic circumvention to be a symptom of a poorly developed industry.<p>How can we have properly functioning programs without clearly-defined, and <i>sensible</i>, semantics?<p>If the developer needs to use registers, then they should choose a dev env&#x2F;PL that provides them, otherwise such kludges will crash and burn, IMO."
+  },
+  {
+    "id": 42390433,
+    "by": "cv5005",
+    "parent": 42387666,
+    "time": 1733938926,
+    "type": "comment",
+    "text": "You dont need UB for that.<p>A simple model for both compilers and programmers to understand:<p>&quot;A variable whose address has not been taken need not be reachable via a random pointer&quot;.<p>I mean that&#x27;s how an assembly programmer would think - if I put something in r0 I don&#x27;t expect a store instruction to clobber it."
+  },
+  {
+    "id": 42387821,
+    "by": "alerighi",
+    "parent": 42387666,
+    "time": 1733926222,
+    "type": "comment",
+    "text": "Does this still matters today? I mean, first registers are anyway saved on the stack when calling a function, and caches of modern processors are really nearly as fast (if not as fast!) as a register. Registers these days are merely labels, since internally the processor (at least for x86) executes the code in a sort of VM.<p>To me it seems that all these optimizations were really something useful back in the day, but nowadays we can as well just ignore them and let the processor figure it out without that much loss of performance.<p>Assuming that the program is &quot;bug free&quot; to me is a terrible idea, since even mitigations that the programmer puts in place to mitigate the effect of bugs (and no program is bug free) are skipped because the compiler can assume the program has no bug. To me security is more important than a 1% more boost in performance."
+  },
+  {
+    "id": 42390292,
+    "by": "uecker",
+    "parent": 42387744,
+    "time": 1733938205,
+    "type": "comment",
+    "text": "Many real world C programs have no UB.<p>What Rust attempts to achieve is the possibility of accidentally introducing UB by designing the language in away that makes it impossible to have UB when sticking to the safe subset.<p>It also possibly to make sure to ensure that C programs have no UB and this does not require any breaking features to C.  It usually requires some refactoring the program."
+  },
+  {
+    "id": 42393905,
+    "by": "comex",
+    "parent": 42393073,
+    "time": 1733957306,
+    "type": "comment",
+    "text": "Just for the record, that&#x27;s not the main purpose of -fdelete-null-pointer-checks.<p>Normally, it only deletes null checks after actual null pointer dereferences.  In principle this can&#x27;t change observable behavior.  Null dereferences are guaranteed to trap, so if you don&#x27;t trap, it means the pointer wasn&#x27;t null.  In other words, <i>unlike most C compiler optimizations</i>, -fdelete-null-pointer-checks should be safe even if you do commit undefined behavior.<p>This once caused a kerfuffle with the Linux kernel.  At the time, x86_64 CPUs allowed the kernel to dereference userspace addresses, and the kernel allowed userspace to map address 0.  Therefore, it was possible for userspace to arrange for null pointers to <i>not</i> trap when dereferenced in the kernel.  Which meant that the null check optimization could actually change observable behavior.  Which introduced a security vulnerability. [1]<p>Since then, Linux has been compiled with `-fno-delete-null-pointer-checks`, but it&#x27;s not really necessary: Linux systems have long since enforced that userspace can&#x27;t map address 0, which means that deleting null pointer checks should be safe in both kernel and userspace.  (Newer CPU security features also protect the kernel even if userspace <i>is</i> allowed to map address 0.)<p>But anyway, I didn&#x27;t know that -fdelete-null-pointer-checks treated &quot;memcpy with potentially-zero size&quot; as a condition to remove subsequent null pointer checks.  That means that the optimization actually isn&#x27;t safe!  Once GCC is updated to respect the newly well-defined behavior, though, it should become truly safe.  Probably.<p>The same can&#x27;t be said for most UB optimizations \u2013 most of which can&#x27;t be turned off.<p>[1] <a href=\"https:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;342330&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;342330&#x2F;</a>"
+  },
+  {
+    "id": 42393232,
+    "by": "ryao",
+    "parent": 42393073,
+    "time": 1733952864,
+    "type": "comment",
+    "text": "Usually, when one marks an argument as nonnull via a function attribute, one wants NULL checks to be removed."
+  },
+  {
+    "id": 42392832,
+    "by": "ryao",
+    "parent": 42390363,
+    "time": 1733950375,
+    "type": "comment",
+    "text": "You can, but gcc may replace it with an equivalent set of instructions as a compiler optimization, so you would have no guarantee it is used unless you hack the compiler.<p>On a related note, GCC optimizing away things is a problem for memset when zeroing buffers containing sensitive data, as GCC can often tell that the buffers are going to be freed and thus the write is deemed unnecessary. That is a security issue and has to be resolved by breaking the compiler\u2019s optimization through a clever trick:<p><a href=\"https:&#x2F;&#x2F;github.com&#x2F;openzfs&#x2F;zfs&#x2F;commit&#x2F;d634d20d1be31dfa8cf06ef2dc96285baf81a2fb\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;openzfs&#x2F;zfs&#x2F;commit&#x2F;d634d20d1be31dfa8cf06e...</a> 12352<p>Similarly, GCC may delete a memcpy to a buffer about to be freed, although I have never observed that as you generally don\u2019t do that in production code."
+  },
+  {
+    "id": 42390661,
+    "by": "mjg59",
+    "parent": 42390363,
+    "time": 1733939942,
+    "type": "comment",
+    "text": "The valid inputs to memcpy() are defined by the C specification, so the compiler is free to make assumptions about what valid inputs are even if the library implementation chooses to allow a broader range of inputs"
+  },
+  {
+    "id": 42392576,
+    "by": "int_19h",
+    "parent": 42390363,
+    "time": 1733948967,
+    "type": "comment",
+    "text": "Per ISO C, the identifiers declared or defined with external linkage by any C standard library header are considered reserved, so the moment you define your own memcpy, you&#x27;re already in UB land."
+  },
+  {
+    "id": 42392404,
+    "by": "MindSpunk",
+    "parent": 42390363,
+    "time": 1733948195,
+    "type": "comment",
+    "text": "Many standard C functions are treated as \u201cmagic\u201d by compilers. Malloc is treated as if it has no side effects (which of course it does, it changes allocator state) so the optimiser can elide allocations. If not you wouldn\u2019t be able to elide the call because malloc looks like it has side effects, which it does but not ones we care about observing."
+  },
+  {
+    "id": 42390657,
+    "by": "0xffff2",
+    "parent": 42390363,
+    "time": 1733939934,
+    "type": "comment",
+    "text": "If I&#x27;m understanding the OP correctly, the C standard says so, i.e. the semantics of memcpy are defined by the standard and the standard says that it&#x27;s UB to pass NULL."
+  },
+  {
+    "id": 42393013,
+    "by": "bonzini",
+    "parent": 42390363,
+    "time": 1733951425,
+    "type": "comment",
+    "text": "If you do so you have to add -fno-builtins (or just -fno-builtin-memcpy)."
+  },
+  {
+    "id": 42399749,
+    "by": "UncleMeat",
+    "parent": 42399526,
+    "time": 1734016034,
+    "type": "comment",
+    "text": "Imagine this program.<p><pre><code>   int foo() {\n     int x = 1;\n     havoc();\n     return x;\n   }\n</code></pre>\nCan this function be compiled to store x in a register? Can it be compiled to remove x entirely and return the constant 1? That relies on &quot;knowing that undefined behavior cannot happen.&quot; This program will behave differently if we store x on the stack and then return it after we call havoc() than if we call havoc() and then return the constant 1, if havoc() just writes to out of bounds memory addresses or whatever.<p>In this case the undefined behavior just feels &quot;more extreme&quot; to most people, but it is remarkably hard for people to rigorously define the undefined behavior that should and should not be considered when making optimizations."
+  },
+  {
+    "id": 42390346,
+    "by": "marssaxman",
+    "parent": 42390161,
+    "time": 1733938508,
+    "type": "comment",
+    "text": "&gt; They&#x27;re just acting as agents that derive the logical consequences of the code.<p>In a particularly pedantic, uptight, and sometimes un-helpful way, yes.<p>Compilers don&#x27;t <i>have</i> to be designed this way; in fact it is a relatively recent development in the history of such tools."
+  },
+  {
+    "id": 42391276,
+    "by": "saurik",
+    "parent": 42390161,
+    "time": 1733942835,
+    "type": "comment",
+    "text": "&gt; The fact that your mental model doesn&#x27;t match the document is an education problem, not a problem with the compiler.<p>Or it is a problem with the document, which is the entire reason we are having this discussion: N3322 argued the document should be fixed, and now it will be for C2y."
+  },
+  {
+    "id": 42393072,
+    "by": "bonzini",
+    "parent": 42389949,
+    "time": 1733951834,
+    "type": "comment",
+    "text": "In real mode assembly days, ES and sometimes DS were just another base register that you could use in a loop. Given the dearth of addressing modes it was quite nice to assume that large arrays started at xxxx0h and therefore that the offset part of the far pointer was zero."
+  },
+  {
+    "id": 42392847,
+    "by": "tsimionescu",
+    "parent": 42392391,
+    "time": 1733950461,
+    "type": "comment",
+    "text": "You completely skipped over the first part: &quot;Two pointers compare equal if and only if <i>both are null pointers</i>&quot;"
+  },
+  {
+    "id": 42397667,
+    "by": "IWeldMelons",
+    "parent": 42393527,
+    "time": 1733995905,
+    "type": "comment",
+    "text": "&quot;NULL&quot; in fact is a macro, not a part of the language.\nnull (zero pointer) is, and it is explicitly defined in standard, that comparison of two null pointers lead to equality. You example simply won&#x27;t compile, it is not undefined; the pointers simply are of different type, period.<p>here what standard says:<p>&quot;A pointer to void may be converted to or from a pointer to any object type.<p>Conversion of a null pointer to another pointer type yields a null pointer of that type. Any two null pointers shall compare equal.&quot;<p>therefore, convert any of them or both to void amd compare.\nyou&#x27;ll get equality."
+  },
+  {
+    "id": 42387712,
+    "by": "Someone",
+    "parent": 42387419,
+    "time": 1733925432,
+    "type": "comment",
+    "text": "&gt; [And if the end of the buffer] were at the end of a page with nothing allocated afterwards, a speculative read from memcpy would break<p>\u2018Only\u2019 on platforms that have memory protection hardware. Even there, the platform can always allocate an overflow page for a process, or have the page fault handler check whether the page fault happened due to a speculative read, and repair things (I think the latter is hugely, hugely, hugely impractical, but the standard cannot rule it out)"
+  },
+  {
+    "id": 42390578,
+    "by": "Zondartul",
+    "parent": 42387419,
+    "time": 1733939578,
+    "type": "comment",
+    "text": "What does &quot;speculative&quot; mean in this case? I understand it as CPU-level speculative execution a.k.a. branch mis-prediction, but that shouldn&#x27;t have any real-world effects (or else we&#x27;d have segfaults all the time due to executing code that didn&#x27;t really happen)"
+  },
+  {
+    "id": 42387407,
+    "by": "larschdk",
+    "parent": 42387160,
+    "time": 1733923181,
+    "type": "comment",
+    "text": "When C was conceived, CPU architectures and platforms were more varied than what we see today. In order to remain portable and yet performant, some details were left as either implementation defined, or completely undefined (i.e. the responsibility of the programmer). Seems archaic today, but it was necessary when C compilers had to be two-pass and run in mere kilobytes of RAM. Even warnings for risky and undefined behavior is a relatively modern concept (last 10-20 years) compared to the age of C."
+  },
+  {
+    "id": 42387688,
+    "by": "killerstorm",
+    "parent": 42387160,
+    "time": 1733925268,
+    "type": "comment",
+    "text": "From what I understand:<p>1. Initially, they just wanted to give compiler makers more freedom: both in the sense &quot;do whatever is simplest&quot; and &quot;do something platform-specific which dev wants&quot;.\n2. Compiler devs found that they can use UB for optimization: e.g. if we assume that a branch with UB is unreachable we can generate more efficient code.\n3. Sadly, compiler devs started to exploit every opportunity for optimization, e.g. removing code with a potential segfault.<p>I.e. people who made a standard thought that compiler would remove no-op call to memcpy, but GCC removes the whole branch which makes the call as it considers the whole branch impossible. Standard makers thought that compiler devs would be more reasonable"
+  },
+  {
+    "id": 42387524,
+    "by": "menaerus",
+    "parent": 42387160,
+    "time": 1733924183,
+    "type": "comment",
+    "text": "Charitable interpretation may be: Back then when the contract of this function was standardized, presumably in C89 which is ~35 years ago, CPUs but also C compilers were not as powerful so wasting an extra couple of CPU cycles to check this condition was much more expensive than it is today. Because of that contract, and which can be seen in the example in the below comments, the compiler is also free to eliminate the dead code which also has the effect of shaving off some extra CPU cycles."
+  },
+  {
+    "id": 42388386,
+    "by": "ynik",
+    "parent": 42387160,
+    "time": 1733929202,
+    "type": "comment",
+    "text": "Probably because they did not think of this special case when writing the standard, or did not find it important enough to consider complicating the standard text for.<p>In C89, there&#x27;s just a general provision for all standard library functions:<p>&gt; Each of the following statements applies unless explicitly stated otherwise in the detailed descriptions that follow. If an argument to a function has an invalid value (such as a value outside the domain of the function, or a pointer outside the address space of the program, or a null pointer), the behavior is undefined. [...]<p>And then there isn&#x27;t anything on `memcpy` that would explicitly state otherwise.\nLater versions of the standard explicitly clarified that this requirement applies even to size 0, but at that point it was only a clarification of an existing requirement from the earlier standard.<p>People like to read a lot more intention into the standard than is reasonable. Lots of it is just historical accident, really."
+  },
+  {
+    "id": 42387541,
+    "by": "lmm",
+    "parent": 42387160,
+    "time": 1733924250,
+    "type": "comment",
+    "text": "Back when they wrote it they were trying to accommodate existing compilers, including those who did useful things to help people catch errors in their programs (e.g. making memcpy trap and send a signal if you called it with NULL). The current generation of compilers that use undefined behaviour as an excuse to do horrible things that screw over regular programmers but increase performance on microbenchmarks postdates the standard."
+  },
+  {
+    "id": 42387470,
+    "by": "wat10000",
+    "parent": 42387160,
+    "time": 1733923779,
+    "type": "comment",
+    "text": "The original C standard was more descriptive than prescriptive. There was probably an implementation where it crashed or misbehaved."
+  },
+  {
+    "id": 42387687,
+    "by": "FartyMcFarter",
+    "parent": 42387160,
+    "time": 1733925263,
+    "type": "comment",
+    "text": "Because the benefit was probably seen as very little, and the cost significant.<p>When you&#x27;re writing a compiler for an architecture where every byte counts you don&#x27;t make it write extra code for little benefit.<p>Programmers were routinely counting bytes (both in code size and data) when writing Assembly code back then, and I mean that literally. Some of that carried into higher-level languages, and rightly so."
+  },
+  {
+    "id": 42387432,
+    "by": "hyperman1",
+    "parent": 42387160,
+    "time": 1733923410,
+    "type": "comment",
+    "text": "memcpy used to be a rep movsb on 8086 DOS compilers. I don&#x27;t remember if rep movsb stops if cx=0 on entry, or decrements first and wraps around, copying 64K of data."
+  },
+  {
+    "id": 42387217,
+    "by": "frabert",
+    "parent": 42387160,
+    "time": 1733921334,
+    "type": "comment",
+    "text": "Every time they leave something undefined, they do so to leave implementations free to use the underlying platform&#x27;s default behavior, and to allow compilers to use it as an optimization point"
+  },
+  {
+    "id": 42387237,
+    "by": "nephanth",
+    "parent": 42387160,
+    "time": 1733921600,
+    "type": "comment",
+    "text": "I mean, they might not have given thought to that particular corner case, they probably wrote something like<p>&gt; memcpy(void* ptr1, void* ptr2, int n)<p>Copy n bytes from ptr1 to ptr2. \nUNDEFINED if ptr1 is NULL or ptr2 is NULL<p>\u2010------<p>It might also have come from a &quot;explicit better than implicit&quot; opinion, as in &quot;it is better to have developers explicitly handle cases where the null pointer is involved"
+  },
+  {
+    "id": 42392643,
+    "by": "Thorrez",
+    "parent": 42392072,
+    "time": 1733949289,
+    "type": "comment",
+    "text": "&gt;Note this is not a plain function, but a special form that applies the constraints dest != NULL and src != NULL to the surrounding scope.<p>Plain functions can apply constraints to the surrounding code:<p><a href=\"https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;fP58WGz9f\" rel=\"nofollow\">https:&#x2F;&#x2F;godbolt.org&#x2F;z&#x2F;fP58WGz9f</a>"
+  },
+  {
+    "id": 42394614,
+    "by": "tialaramex",
+    "parent": 42392072,
+    "time": 1733962081,
+    "type": "comment",
+    "text": "&gt; I&#x27;d love to have a flag &quot;-fno-surprizing-ub&quot; or &quot;-fhighlevel-assembler&quot; combined with the above `assume` function or some other syntax to let me help the compiler, so that I can write C like in the 90s - close to metal but with less surprizes.<p>The problem, which you may realise with some more introspection is that &quot;surprising&quot; is actually a property of you, not of the compiler, so you&#x27;re asking for mind-reading and that&#x27;s not one of the options. You want <i>not to experience surprise</i>.<p>You can of course still get 1990s compilers and you&#x27;re welcome to them. I cannot promise you won&#x27;t still feel surprised despite your compiler nostalgia, but I can pretty much guarantee that the 1990s compiler results in slower <i>and</i> buggier software, so that&#x27;s nice, remember only to charge 1990s rates for the work."
+  },
+  {
+    "id": 42392818,
+    "by": "int_19h",
+    "parent": 42388002,
+    "time": 1733950235,
+    "type": "comment",
+    "text": "People will only rely on UB when it is well defined by a particular implementation, either explicitly or because of a long history of past use. E.g. using unions for type punning in gcc, or allowing methods to be called on null pointers in MSVC.<p>But there&#x27;s nothing like that here."
+  },
+  {
+    "id": 42387318,
+    "by": "creshal",
+    "parent": 42387223,
+    "time": 1733922247,
+    "type": "comment",
+    "text": "&gt; What if the objects are non-NULL, but invalid (not actually allocated)?<p>Still UB, since they&#x27;re restricted pointers that must be valid to begin with."
+  },
+  {
+    "id": 42387296,
+    "by": "pkhuong",
+    "parent": 42387223,
+    "time": 1733922087,
+    "type": "comment",
+    "text": "also UB according to the spec, but LLVM is free to define it. e.g., clang often converts trivial C++ copy constructors to memcpy, which is UB for self-assignment, but I assume that&#x27;s fine because the C++ front-end only targets LLVM, and LLVM presumably defines the behaviour to do what you&#x27;d expect."
+  },
+  {
+    "id": 42387870,
+    "by": "badmintonbaseba",
+    "parent": 42387223,
+    "time": 1733926481,
+    "type": "comment",
+    "text": "Still technically UB according to the proposed wording. The proposed wording only deals with allowing null pointers explicitly."
+  },
+  {
+    "id": 42388768,
+    "by": "NobodyNada",
+    "parent": 42387349,
+    "time": 1733931156,
+    "type": "comment",
+    "text": "If you do this, your C code will run significantly slower than, say, Java, Go, or C#, because the compiler is unable to apply even the most basic optimizations (which it can do still in all those other languages).<p>So, at that point why even use C at all? Today, C is used where the overhead of a managed language is unacceptable. If you could just eat the performance cost, you&#x27;d probably already be using a managed language. There&#x27;s not much desire for a variant of C with what would be at least a 10x slowdown in many workloads."
+  },
+  {
+    "id": 42387405,
+    "by": "gpderetta",
+    "parent": 42387349,
+    "time": 1733923163,
+    "type": "comment",
+    "text": "<p><pre><code>  int* oracle();\n  int foo() {\n      int x = 1;\n      *oracle() = 42;\n      return x;\n  }\n</code></pre>\nIs the above program allowed to return anything other than 1 in your language?"
+  },
+  {
+    "id": 42388975,
+    "by": "layer8",
+    "parent": 42387349,
+    "time": 1733932295,
+    "type": "comment",
+    "text": "That would restrict C to memory models with a linear address space. That is usually the case nowadays for C implementations, but maybe we don\u2019t want to set that in stone, because it would be virtually impossible to revert such a guarantee.<p>There\u2019s also cases like memory address ranges that map to non-memory hardware (i.e. that don\u2019t behave like \u201cdumb\u201d memory), and how would you have the C standard define behavior for those?<p>Lastly, CPU caches require <i>some</i> sort of abstract model as soon as you have multi-threading."
+  },
+  {
+    "id": 42389200,
+    "by": "Measter",
+    "parent": 42387349,
+    "time": 1733933364,
+    "type": "comment",
+    "text": "The value of an abstract machine is that it allows you to specify how a given program behaves without needing to point to a specific piece of hardware. Compilers then have this as a target when compiling a program for a specific piece of hardware so that they know when the compiler&#x27;s output is correct.<p>The issue here is that the abstract machine is under or badly specified."
+  },
+  {
+    "id": 42387506,
+    "by": "sixfiveotwo",
+    "parent": 42387349,
+    "time": 1733924079,
+    "type": "comment",
+    "text": "How would you define what a memory address is without first defining in which context it has a meaning?"
+  },
+  {
+    "id": 42387374,
+    "by": "davidt84",
+    "parent": 42387349,
+    "time": 1733922853,
+    "type": "comment",
+    "text": "Congratulations, you&#x27;ve invented an entirely new language.<p>Now, who&#x27;s going to write the compiler for it?"
+  },
+  {
+    "id": 42387574,
+    "by": "lmm",
+    "parent": 42387349,
+    "time": 1733924460,
+    "type": "comment",
+    "text": "20 years ago, making a C compiler that provided sane behaviour and better guarantees (going beyond the minimum defined in the standard) to make code safer and programmers&#x27; lives easier, even at the cost of some performance, might have been a good idea. Today any programmer who thinks things like not having security bugs are more important than having bigger numbers on microbenchmarks has already moved on from C."
+  },
+  {
+    "id": 42394617,
+    "by": "Dylan16807",
+    "parent": 42394234,
+    "time": 1733962085,
+    "type": "comment",
+    "text": "&gt; If you can easily and perfectly detect an error, it should just go into the compiler (and perhaps language spec).<p>Nobody seems to care much about removing UB even when it&#x27;s super easy.  For example, a bunch of basic syntax errors like forgetting the closing quote on a string or not having a newline at the end of the file are UB."
+  },
+  {
+    "id": 42388021,
+    "by": "bagels",
+    "parent": 42387873,
+    "time": 1733927367,
+    "type": "comment",
+    "text": "It all adds up. All those instructions you don&#x27;t have to execute, especially memory access and cache misses from jumps, pipeline stalls from conditionals, not just from this optimization."
+  },
+  {
+    "id": 42388158,
+    "by": "menaerus",
+    "parent": 42387873,
+    "time": 1733928089,
+    "type": "comment",
+    "text": "It depends on your CPU microarchitectural details, on the complexity and size of your binary executable and the workload of your binary.<p>So there&#x27;s no universal answer to your question but it could very well be &quot;much&quot;."
+  },
+  {
+    "id": 42388028,
+    "by": "ncruces",
+    "parent": 42387873,
+    "time": 1733927394,
+    "type": "comment",
+    "text": "Imagine that you created a function GetPixel that reads an RGB pixel at a memory address, and which has a NULL check as a precondition.<p>If the compiler can &quot;prove&quot; that the pointer is not NULL it can (after inlining the call) remove 20 million checks for a 20 megapixel image.<p>The silly issue is the compiler using &quot;you accessed it before&quot; (aka &quot;undefined behaviour&quot;) to &quot;prove&quot; that the pointer is not NULL.<p>But I can attest that avoiding 20 million such checks does indeed make a huge difference."
+  },
+  {
+    "id": 42388321,
+    "by": "wat10000",
+    "parent": 42387856,
+    "time": 1733928893,
+    "type": "comment",
+    "text": "Are you saying that C compilers should change every local variable access to read and write to the stack just in case some function intentionally does weird pointer arithmetic to change their values without referring to them in the source code?"
+  },
+  {
+    "id": 42388192,
+    "by": "gpderetta",
+    "parent": 42387856,
+    "time": 1733928267,
+    "type": "comment",
+    "text": "We stopped explicitly declaring locals with the &#x27;register&#x27; keyword circa 40 years ago. Register allocation is a low hanging fruit and one of those things that is definitely best left to a compiler for most code."
+  },
+  {
+    "id": 42389206,
+    "by": "wruza",
+    "parent": 42387856,
+    "time": 1733933376,
+    "type": "comment",
+    "text": "And now they have to manage register pressure for it to keep being faster. And false dependencies. And some more. It doesn\u2019t work like that. Developers can\u2019t optimize like compilers do, not with modern CPUs. The compilers do the very heavy lifting in exchange for the complexity of a set of constraints they (and you as a consequence, must) rely on. The more relaxed these constraints are, the less performant code you get. Modern CPUs run modern interpreters as fast as dumbest-compiled C code basically, so if you want sensible semantics, then Typescript is one of the absolutely non-ironic answers."
+  },
+  {
+    "id": 42388052,
+    "by": "bagels",
+    "parent": 42387856,
+    "time": 1733927480,
+    "type": "comment",
+    "text": "We pay for the flexibility of not wearing seatbelts for increasing the consequences of crashes."
+  },
+  {
+    "id": 42393115,
+    "by": "UncleMeat",
+    "parent": 42390433,
+    "time": 1733952115,
+    "type": "comment",
+    "text": "What you describe there is UB. If you define this in the standard, you are defining a kind of runtime behavior that can never happen in a well formed program and the compiler does not have to make a program that encounters this behavior do anything in particular."
+  },
+  {
+    "id": 42388163,
+    "by": "gpderetta",
+    "parent": 42387821,
+    "time": 1733928114,
+    "type": "comment",
+    "text": "Register allocation is one of the most basic optimizations that a compiler can do. Some modern cpus can alias stack memory with internal registers, but it is still not as fast as not spilling at all.<p>You can enjoy -O0 today and the compiler will happily allocate stack slots for all your variables and keep them up to date (which is useful for debugging). But the difference between -O0 and -O3 is orders of magnitude on many programs."
+  },
+  {
+    "id": 42390370,
+    "by": "cesarb",
+    "parent": 42387821,
+    "time": 1733938639,
+    "type": "comment",
+    "text": "&gt; I mean, first registers are anyway saved on the stack when calling a function<p>No, they aren&#x27;t. For registers defined in the calling convention as &quot;callee-saved&quot;, they don&#x27;t have to be saved on the stack before calling a function (and the called function only has to save them if it actually uses that register). And for registers defined as &quot;caller-saved&quot;, they only have to be saved if their value needs to be kept. The compiler knows all that, and tends to use caller-saved registers as scratch space (which doesn&#x27;t have to be preserved), and callee-saved registers for longer-lived values.<p>&gt; and caches of modern processors are really nearly as fast (if not as fast!) as a register.<p>No, they aren&#x27;t. For instance, a quick web search tells me that the L1D cache for a modern AMD CPU has at least 4 cycles of latency. Which means: even if the value you want to read is already in the L1 cache, the processor has to wait 4 cycles before it has that value.<p>&gt; Registers these days are merely labels, since internally the processor (at least for x86) executes the code in a sort of VM.<p>No, they aren&#x27;t. The register file still exists, even though register renaming means which physical register corresponds to a logical register can change. And there&#x27;s no VM, most common instructions are decoded directly (without going through microcode) into a single \u00b5Op or pair of \u00b5Ops which is executed directly.<p>&gt; To me it seems that all these optimizations were really something useful back in the day, but nowadays we can as well just ignore them and let the processor figure it out without that much loss of performance.<p>It&#x27;s the opposite: these optimizations are more important nowadays, since memory speeds have not kept up with processor speeds, and power consumption became more relevant.<p>&gt; To me security is more important than a 1% more boost in performance.<p>Newer programming languages agree with you, and do things like checking array bounds on every access; they rely on compiler optimizations so that the loss of performance is only that &quot;1%&quot;."
+  },
+  {
+    "id": 42389302,
+    "by": "wbl",
+    "parent": 42387821,
+    "time": 1733933790,
+    "type": "comment",
+    "text": "Many calling conventions use registers. And no loads and stores are extremely complex and not free at all: fewer can issue in each cycle and there&#x27;s some very expensive hardware spent to maintain the ordering on execution."
+  },
+  {
+    "id": 42394719,
+    "by": "tialaramex",
+    "parent": 42390292,
+    "time": 1733962947,
+    "type": "comment",
+    "text": "&gt; Many real world C programs have no UB.<p>A bold claim, I&#x27;ve written a whole lot of software in C, and most of it I&#x27;d be astonished if it truly has no UB. Even some of the relatively small, carefully written programs probably have edge case UB I never worried about when writing them."
+  },
+  {
+    "id": 42413002,
+    "by": "Arch-TK",
+    "parent": 42390292,
+    "time": 1734129924,
+    "type": "comment",
+    "text": "I think I worded it poorly. In a real world program, a lot of optimizations rely on assumptions of not triggering UB.<p>Rephrased:<p>In a real world program removing all opportunities for UB is in some cases impossible without adding new breaking features to the C language.<p>This has nothing to do with whether you can or can&#x27;t write a program without invoking UB. I am talking about a hypothetical large program which does not exhibit undefined behaviour but where if you modified it then you could trigger UB in many ways. The idea I am positing is that to make it such that you could not modify such a program in any way which could trigger UB, would be impossible without adding new breaking features to the C language (e.g. you would need to figure out some way of preventing pointers from being used outside of the lifetime of the object they point to)."
+  },
+  {
+    "id": 42394052,
+    "by": "robinsonb5",
+    "parent": 42393905,
+    "time": 1733958401,
+    "type": "comment",
+    "text": "&gt; Null dereferences are guaranteed to trap, so if you don&#x27;t trap, it means the pointer wasn&#x27;t null.<p>&lt;laughs in embedded-system-with-no-MMU&gt;"
+  },
+  {
+    "id": 42402964,
+    "by": "rcxdude",
+    "parent": 42393905,
+    "time": 1734034790,
+    "type": "comment",
+    "text": "There was a more egregoius one which got Linus further pissed off with GCC, which was due to a &#x27;dereference&#x27; that would not trap, but still deleted a later null check (because e.g. int *foo = &amp;bar-&gt;baz is basically just calculating an offset to bar, and so will not fail at runtime, but it is still a dereference according to the abstract machine and so is undefined if bar is NULL). I think the risk of something like that is why it&#x27;s still disabled."
+  },
+  {
+    "id": 42393418,
+    "by": "ndesaulniers",
+    "parent": 42393232,
+    "time": 1733954067,
+    "type": "comment",
+    "text": "There&#x27;s two similar but distinct function attributes for nullability. One affects codegen, one affects diagnostics only."
+  },
+  {
+    "id": 42393881,
+    "by": "AceJohnny2",
+    "parent": 42393232,
+    "time": 1733957045,
+    "type": "comment",
+    "text": "Irrelevant, because delete-null-pointer-checks happens even in absence of nonnull function attribute, see GP&#x27;s godbolt link, and the documentation that omits any reference to that function attribute.<p><i>That&#x27;s</i> what makes it dangerous!"
+  },
+  {
+    "id": 42394337,
+    "by": "sfink",
+    "parent": 42392832,
+    "time": 1733960212,
+    "type": "comment",
+    "text": "&gt; Similarly, GCC may delete a memcpy to a buffer about to be freed, although I have never observed that as you generally don\u2019t do that in production code.<p>It&#x27;s not that crazy. You could have a refcounted object that poisons itself when the refcount drops to zero, but doesn&#x27;t immediately free itself because many malloc implementations can have bad lock contention on free(). So you poison the object to detect bugs, possibly only in certain configurations, and then queue the pointer for deferred freeing on a single thread at a better time.<p>(Ok, this doesn&#x27;t quite do it: poisoning is much more likely to use memset than memcpy, but I assume gcc would optimize out a doomed memset too?)"
+  },
+  {
+    "id": 42392888,
+    "by": "gpderetta",
+    "parent": 42392404,
+    "time": 1733950689,
+    "type": "comment",
+    "text": "Not only that, malloc is also assumed to return pointer that don&#x27;t alias anything else."
+  },
+  {
+    "id": 42392653,
+    "by": "tialaramex",
+    "parent": 42390657,
+    "time": 1733949334,
+    "type": "comment",
+    "text": "Unlike all the more complicated languages the &quot;freestanding&quot; mode C doesn&#x27;t even have a memcpy feature, so it may not define how one works - maybe you&#x27;ve decided to use the name &quot;memcpy&quot; for your function which generates a memorandum about large South American rodents, and &quot;memo_capybara&quot; was too much typing.<p>In something like C++ or Rust, even their bare metal &quot;What do you mean <i>Operating System</i>?&quot; modes quietly require memcpy and so on because we&#x27;re not savages, clearly somebody should provide a way to <i>copy bytes of memory</i>, Rust is so civilised that even on bare metal (in Rust&#x27;s &quot;core&quot; library) you get a working sort_unstable() for your arbitrary slice types!"
+  },
+  {
+    "id": 42404489,
+    "by": "mpweiher",
+    "parent": 42399749,
+    "time": 1734046173,
+    "type": "comment",
+    "text": "&gt; That relies on &quot;knowing that undefined behavior cannot happen.&quot;<p>No it doesn&#x27;t."
+  },
+  {
+    "id": 42397381,
+    "by": "lelanthran",
+    "parent": 42392847,
+    "time": 1733992557,
+    "type": "comment",
+    "text": "&gt; You completely skipped over the first part: &quot;Two pointers compare equal if and only if both are null pointers&quot;<p>Maybe he elided it in an optimisation pass?"
+  },
+  {
+    "id": 42394524,
+    "by": "dwattttt",
+    "parent": 42392847,
+    "time": 1733961535,
+    "type": "comment",
+    "text": "Can&#x27;t get much more of a reading comprehension failure than that. Good thing I don&#x27;t write compilers."
+  },
+  {
+    "id": 42387866,
+    "by": "immibis",
+    "parent": 42387712,
+    "time": 1733926458,
+    "type": "comment",
+    "text": "Platforms without memory protection hardware also have no problem reading NULL."
+  },
+  {
+    "id": 42392860,
+    "by": "dwattttt",
+    "parent": 42390578,
+    "time": 1733950500,
+    "type": "comment",
+    "text": "Turns out you can have that kind of speculative failure too! <a href=\"https:&#x2F;&#x2F;randomascii.wordpress.com&#x2F;2018&#x2F;01&#x2F;07&#x2F;finding-a-cpu-design-bug-in-the-xbox-360&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;randomascii.wordpress.com&#x2F;2018&#x2F;01&#x2F;07&#x2F;finding-a-cpu-d...</a>"
+  },
+  {
+    "id": 42387442,
+    "by": "actionfromafar",
+    "parent": 42387407,
+    "time": 1733923525,
+    "type": "comment",
+    "text": "When C was conceived, it was made for a specific DEC CPU, for making an operating system. The idea of a C <i>standard</i> was in the future.<p>If you wanted to know what (for instance) memcpy <i>actually</i> did, you looked at the source code, or even more likely, the assembler or machine code output. That was &quot;the standard&quot;."
+  },
+  {
+    "id": 42388880,
+    "by": "scoutt",
+    "parent": 42387407,
+    "time": 1733931780,
+    "type": "comment",
+    "text": "&gt; Seems archaic today ... run in mere kilobytes of RAM<p>There is an entire industry that does pretty much that... today. They might run in flash instead of RAM, but still, a few kilobytes.<p>Probably there are more embedded devices out there than PCs. PIC, AVR, MSP, ARM, custom archs. There might be one of those right now under your hand, in that thing you use to move the cursor."
+  },
+  {
+    "id": 42388100,
+    "by": "kllrnohj",
+    "parent": 42387688,
+    "time": 1733927721,
+    "type": "comment",
+    "text": "&gt; Standard makers thought that compiler devs would be more reasonable<p>This is a bit of a terrible take? Compiler devs never did anything &quot;unreasonable&quot;, they didn&#x27;t sit down and go &quot;mwahahaha we can exploit the heck out of UB to break everything!!!!&quot;<p>Rather, repeatedly applying a series of targeted optimizations, each one in isolation being &quot;reasonable&quot;, results in an eventual &quot;unreasonable&quot; total transformation. But this is more an emergent property of modern compilers having hundreds of optimization passes.<p>At the time the standards were created, the idea of compilers applying so many optimization passes was just not conceivable. Compilers struggled to just do basic compilation. The assumption was a near 1:1 mapping between code &amp; assembly, and that just didn&#x27;t age well at all."
+  },
+  {
+    "id": 42388899,
+    "by": "UncleMeat",
+    "parent": 42387688,
+    "time": 1733931886,
+    "type": "comment",
+    "text": "There isn&#x27;t a &quot;find UB branches&quot; pass that is seeking out this stuff.<p>Instead what happens is that you have something like a constant folding or value constraint pass that computes a set of possible values that a variable can hold at various program points by applying constraints of various options. Then you have a dead code elimination pass that identifies dead branches. This pass doesn&#x27;t know <i>why</i> the &quot;dest&quot; variable can&#x27;t hold the NULL value at the branch. It just knows that it can&#x27;t, so it kills the branch.<p>Imagine the following code:<p><pre><code>   int x = abs(get_int());\n   if (x &lt; 0) {\n     &#x2F;&#x2F; do stuff\n   }\n</code></pre>\nCan the compiler eliminate the branch? Of course. All that&#x27;s happened here is that the constraint propagation feels &quot;reasonable&quot; to you in this case and &quot;unreasonable&quot; to you in the memcpy case."
+  },
+  {
+    "id": 42391889,
+    "by": "mjevans",
+    "parent": 42387688,
+    "time": 1733945968,
+    "type": "comment",
+    "text": "More reasonable: Emit a warning or error to make the code and human writing it better.<p>NOT-reasonable: silently &#x27;optimize&#x27; a &#x27;gotcha&#x27; into behavior the programmer(s) didn&#x27;t intend."
+  },
+  {
+    "id": 42388376,
+    "by": "dfox",
+    "parent": 42387432,
+    "time": 1733929147,
+    "type": "comment",
+    "text": "The specification does not explicitly say that, but the clear intention is that REP with CX=0 should be no-op (you get exactly that situation when REP gets interrupted during the last iteration, in that case CX is zero and IP points to the REP, not the following instruction)."
+  },
+  {
+    "id": 42387951,
+    "by": "connicpu",
+    "parent": 42387432,
+    "time": 1733926981,
+    "type": "comment",
+    "text": "I know at least MSVC&#x27;s memcpy on x86_64 still results in a rep movsb if the cpuid flag that says rep movsb is fast is set, which it should be on all x86 chips from about 2011&#x2F;2012 and onward ;)"
+  },
+  {
+    "id": 42387554,
+    "by": "lucozade",
+    "parent": 42387217,
+    "time": 1733924352,
+    "type": "comment",
+    "text": "&gt;  time they leave something undefined, they do so to leave implementations free to use the underlying platform&#x27;s default behavior<p>That&#x27;s implementation defined (more or less) ie teh compiler can do whatever makes mst sense for its implementation.<p>Undefined means (more or less) that the compiler can assume the behaviour never happens so can apply transforms without taking it into account.<p>&gt; to allow compilers to use it as an optimization point<p>That&#x27;s the main advantage of undefined behaviour ie if you can ignore the usage, you may be able to apply optimisations that you couldn&#x27;t if you had to take it into account. In the article, for example, GCC eliminated what it considered dead code for a NULL check of a variable that couldn&#x27;t be NULL according to the C spec.<p>That&#x27;s also probably the most frustrating thing about optimisations based on undefined behaviour ie checks that prevent undefined behaviour are removed because the compiler thinks that the check can&#x27;t ever succeed because, if it did, there must have been undefined behaviour. But the way the developer was ensuring defined behaviour was with the check!"
+  },
+  {
+    "id": 42387371,
+    "by": "jcelerier",
+    "parent": 42387217,
+    "time": 1733922816,
+    "type": "comment",
+    "text": "Here it&#x27;s more that it allows to assume that this is never the case, thus no need to have  an additional check in it I assume ?"
+  },
+  {
+    "id": 42387531,
+    "by": "jbverschoor",
+    "parent": 42387237,
+    "time": 1733924218,
+    "type": "comment",
+    "text": "I think it&#x27;s more a strategy. C was not created to be safe. It&#x27;s pretty much a tiny wrapper around assembler. Every limitation requires extra cycles, compile time or runtime, both of which were scarce.<p>Of course, someone needs to check in the layers of abstraction. The user, programmer, compiler, cpu, architecture.. They chose for the programmer, who like to call themselves &quot;engineers&quot; these days."
+  },
+  {
+    "id": 42397023,
+    "by": "pjmlp",
+    "parent": 42392818,
+    "time": 1733988559,
+    "type": "comment",
+    "text": "Until a compiler version comes out and since it was UB anyway, the compiler sundenly now behaves in a different way."
+  },
+  {
+    "id": 42393209,
+    "by": "bonzini",
+    "parent": 42387318,
+    "time": 1733952694,
+    "type": "comment",
+    "text": "This is wrong. If you do p=malloc(256), p+256 is valid even though it does not point to a valid address (it might be in an unmapped page; check out ElectricFence). Rust&#x27;s non-null aligned other pointer is the same, memcpy can&#x27;t assume it can be dereferenced if the size is zero. The standard text in the linked paper says the same."
+  },
+  {
+    "id": 42387329,
+    "by": "whytevuhuni",
+    "parent": 42387296,
+    "time": 1733922335,
+    "type": "comment",
+    "text": "Where I work, it is quite normal to link together C code compiled with GCC and Rust code compiled with LLVM, due to how the build system is set up.<p>As far as I know that disables LTO, but the build system is so complex, and the C code so large, that nobody bothers switching the C side to Clang&#x2F;LLVM as well."
+  },
+  {
+    "id": 42390732,
+    "by": "cv5005",
+    "parent": 42388768,
+    "time": 1733940271,
+    "type": "comment",
+    "text": "Or it could be made faster because certain manual optimizations become possible.<p>An example would a table of interned strings that you wanna match against (say you&#x27;re writing a parser).\nSince standard C says thou shall not compare pointers with &lt; or &gt; unless they both point into the same &#x27;object&#x27; you are forbidden from doing the speed of light code:<p><pre><code>  char *keywords_begin, *keywords_end;\n  if(some_str &gt;= keywords_begin &amp;&amp; some_str &lt; keywords_end) ...\n</code></pre>\nOfficial standard sanctioned workarounds would require extra indirection (using indices for example) which is suboptimal."
+  },
+  {
+    "id": 42387641,
+    "by": "kibwen",
+    "parent": 42387405,
+    "time": 1733924954,
+    "type": "comment",
+    "text": "To elaborate, we treat pointers as more than just integers because it gives optimizers the latitude to reorder and eliminate pointer operations. In the example above we cannot do this, because we cannot prove at compile time that x doesn&#x27;t live at the address returned by oracle.<p>For some high-quality further discussion, see Ralf Jung&#x27;s series of blog posts starting with <a href=\"https:&#x2F;&#x2F;www.ralfj.de&#x2F;blog&#x2F;2018&#x2F;07&#x2F;24&#x2F;pointers-and-bytes.html\" rel=\"nofollow\">https:&#x2F;&#x2F;www.ralfj.de&#x2F;blog&#x2F;2018&#x2F;07&#x2F;24&#x2F;pointers-and-bytes.html</a>"
+  },
+  {
+    "id": 42387905,
+    "by": "shultays",
+    "parent": 42387405,
+    "time": 1733926732,
+    "type": "comment",
+    "text": "Is it allowed to return anything else in C? Is there anything in standard C that would allow oracle() to access memory address of x?<p>Sure different compilers might allow inlining assembly or some other ways to access x on previous stack perhaps but then it is not really &quot;C&quot;"
+  },
+  {
+    "id": 42388130,
+    "by": "codedokode",
+    "parent": 42387405,
+    "time": 1733927897,
+    "type": "comment",
+    "text": "When using C, this can return anything (or crash of oracle function returns an invalid pointer, or rewrite its own code if the code section is writable). So if you get rid of &quot;abstract machine&quot;, nothing changes - the program can return anything or crash."
+  },
+  {
+    "id": 42387772,
+    "by": "alerighi",
+    "parent": 42387405,
+    "time": 1733925848,
+    "type": "comment",
+    "text": "Well even in C is not guaranteed to return anything other than 1, since oracle() may return the memory address of variable 1."
+  },
+  {
+    "id": 42388199,
+    "by": "codedokode",
+    "parent": 42387506,
+    "time": 1733928310,
+    "type": "comment",
+    "text": "C was written as a portable assembly language, so I think a memory address is a number that CPU considers to be a memory address."
+  },
+  {
+    "id": 42390081,
+    "by": "anticensor",
+    "parent": 42387374,
+    "time": 1733937241,
+    "type": "comment",
+    "text": "No, it&#x27;s C at -O0."
+  },
+  {
+    "id": 42390168,
+    "by": "uecker",
+    "parent": 42387574,
+    "time": 1733937627,
+    "type": "comment",
+    "text": "This is certainly not true. Many programmers also learned to the use tools available to write reasonably safe code in C. I do not personally find this problematic."
+  },
+  {
+    "id": 42395331,
+    "by": "Chaosvex",
+    "parent": 42394617,
+    "time": 1733968571,
+    "type": "comment",
+    "text": "I know this is a discussion about C but I&#x27;ll add that C++ removed the newline requirement."
+  },
+  {
+    "id": 42390343,
+    "by": "cv5005",
+    "parent": 42388028,
+    "time": 1733938495,
+    "type": "comment",
+    "text": "Just make a non null checking version: GetPixelUnsafe()\nand let the responsibility onto the user to do the null check before the loop.<p>All of these &#x27;problems&#x27; have simple and straigtforward workarounds, I&#x27;m not convinced these UB are needed at all."
+  },
+  {
+    "id": 42393766,
+    "by": "Dylan16807",
+    "parent": 42388028,
+    "time": 1733956159,
+    "type": "comment",
+    "text": "If we&#x27;re inlining the call, then we can hoist the NULL check out of the loop.  Now it&#x27;s 1 check per 20 million operations.  There&#x27;s no need to eliminate it or have UB at that point."
+  },
+  {
+    "id": 42395562,
+    "by": "uecker",
+    "parent": 42394719,
+    "time": 1733970451,
+    "type": "comment",
+    "text": "It is certainly true that many C programs have edge cases which trigger UB. I also have written many such programs where I did not care. This does not contradict my statement though. There are programmers who meticulously care (and&#x2F;or have to care) about getting the edge cases right and this is entirely possible."
+  },
+  {
+    "id": 42419216,
+    "by": "uecker",
+    "parent": 42413002,
+    "time": 1734208078,
+    "type": "comment",
+    "text": "This is exactly what I am working on.<p>But this does not need breaking features, it only needs 1) a opt-in safe mode, and 2) annotations to express additional invariant such as for lifetime. This would not break anything."
+  },
+  {
+    "id": 42396712,
+    "by": "dfe",
+    "parent": 42394052,
+    "time": 1733984326,
+    "type": "comment",
+    "text": "I once spent hours if not days debugging a problem with some code I had recently written because of this exact optimization.<p>It wasn&#x27;t an embedded system, but rather an x86 BIOS boot loader, which is sort of halfway there.  Protected mode enabled without paging, so there&#x27;s nothing to trap a NULL.<p>Completely by accident I had dereferenced a pointer before doing a NULL check.  I think the dereference was just printing some integer, which of course had a perfectly sane-looking value so I didn&#x27;t even think about it.<p>The compiler, I can&#x27;t remember if it was gcc or clang by this point, decided that since I had already successfully dereferenced the pointer it could just elide the null check and the code path associated with it.<p>Finally I ran it in VMware and attached a debugger, which skipped right over the null check even though I could see in the debugger the value was null. So then I went to look at the assembly the compiler generated, and that&#x27;s when I started to understand what had happened.<p>It was a head-slapper when I found the dereference above.  I added a second null check or moved that code or some such, and that was it."
+  },
+  {
+    "id": 42394076,
+    "by": "ryao",
+    "parent": 42393418,
+    "time": 1733958542,
+    "type": "comment",
+    "text": "Which are those? I only know about nonnull, nonnull_if_nonzero and returns_nonnull:<p><a href=\"https:&#x2F;&#x2F;gcc.gnu.org&#x2F;onlinedocs&#x2F;gcc&#x2F;Common-Function-Attributes.html\" rel=\"nofollow\">https:&#x2F;&#x2F;gcc.gnu.org&#x2F;onlinedocs&#x2F;gcc&#x2F;Common-Function-Attribute...</a>"
+  },
+  {
+    "id": 42393980,
+    "by": "ryao",
+    "parent": 42393881,
+    "time": 1733957814,
+    "type": "comment",
+    "text": "That is a side effect of passing the pointer as a function parameter marked nonnull. It implies that the pointer is nonnull and any NULL checks against it can be removed. Pass it to a normal function and you will not see the NULL check removed."
+  },
+  {
+    "id": 42395005,
+    "by": "Chaosvex",
+    "parent": 42394337,
+    "time": 1733965264,
+    "type": "comment",
+    "text": "Yes, it potentially could be optimised out, which is why platforms provide functions like SecureZeroMemory() for cases where you want to be sure that memory is zeroed out."
+  },
+  {
+    "id": 42395194,
+    "by": "ryao",
+    "parent": 42394337,
+    "time": 1733967149,
+    "type": "comment",
+    "text": "That would be why I introduced an explicit_memset() into the OpenZFS encryption module in the commit that I linked. It uses two different techniques to guard against the compiler deleting it."
+  },
+  {
+    "id": 42393025,
+    "by": "bonzini",
+    "parent": 42392653,
+    "time": 1733951516,
+    "type": "comment",
+    "text": "The compiler is free to give a meaning to memcpy if run in the (default) hosted mode. There&#x27;s -ffreestanding for freestanding environments."
+  },
+  {
+    "id": 42405527,
+    "by": "UncleMeat",
+    "parent": 42404489,
+    "time": 1734057737,
+    "type": "comment",
+    "text": "Yes it does. The optimizing this to return the constant 1 is not producing an equivalent program unless we make assumptions about the behavioral bounds of havoc()."
+  },
+  {
+    "id": 42396868,
+    "by": "tsimionescu",
+    "parent": 42394524,
+    "time": 1733986563,
+    "type": "comment",
+    "text": "Happens to everyone, don&#x27;t worry, especially when trying to focus on details, ironically..."
+  },
+  {
+    "id": 42387908,
+    "by": "Someone",
+    "parent": 42387866,
+    "time": 1733926735,
+    "type": "comment",
+    "text": "My comment is a reply to (part of) a comment that isn\u2019t talking about reading from NULL. That\u2019s what the  <i>[And if the end of the buffer]</i> part implies.<p>Even if it didn\u2019t, I don\u2019t think the standard should assume that <i>\u201cPlatforms without memory protection hardware also have no problem reading NULL\u201d</i><p>An OS could, for example, have a very simple memory protection feature where the bottom half of the memory address range is reserved for the OS, the top half for user processes, and any read from an address with the high bit clear by code in the top half of the address range traps and makes the OS kill the process doing the read."
+  },
+  {
+    "id": 42390452,
+    "by": "kevin_thibedeau",
+    "parent": 42387866,
+    "time": 1733938994,
+    "type": "comment",
+    "text": "They may also expect writes to address 0."
+  },
+  {
+    "id": 42388444,
+    "by": "hun3",
+    "parent": 42387866,
+    "time": 1733929547,
+    "type": "comment",
+    "text": "Not really. MMIO mapped at 0x0 for example."
+  },
+  {
+    "id": 42390169,
+    "by": "da_chicken",
+    "parent": 42387442,
+    "time": 1733937632,
+    "type": "comment",
+    "text": "I think it&#x27;s reasonable to assume that GP clearly meant the C standard being conceived, as, obviously, K&amp;R&#x27;s C implementation of the language was ad hoc rather than exhibiting any prescribed specification."
+  },
+  {
+    "id": 42388968,
+    "by": "anticensor",
+    "parent": 42387442,
+    "time": 1733932269,
+    "type": "comment",
+    "text": "No, K&amp;R&#x27;s book was the standard."
+  },
+  {
+    "id": 42389140,
+    "by": "krisoft",
+    "parent": 42388880,
+    "time": 1733933065,
+    "type": "comment",
+    "text": "&gt; There is an entire industry that does pretty much that... today.<p>Which industry runs C compilers on embeded devices? Because that is what the part you elipsised out was talking about."
+  },
+  {
+    "id": 42389058,
+    "by": "LegionMammal978",
+    "parent": 42388100,
+    "time": 1733932697,
+    "type": "comment",
+    "text": "One could argue that &quot;optimizing based on signed overflow&quot; was an unreasonable step to take, since any given platform will have some sane, consistent behavior when the underlying instructions cause an overflow. A developer using signed operations without poring over the standard might have easily expected incorrect values (or maybe a trap if the platform likes to use those), but not big changes in control flow. In my experience, signed overflow is generally the biggest cause of &quot;they&#x27;re putting UB in my reasonable C code!&quot;, followed by the rules against type punning, which are violated every day by ordinary usage of the POSIX socket functions."
+  },
+  {
+    "id": 42395830,
+    "by": "lmm",
+    "parent": 42388100,
+    "time": 1733973036,
+    "type": "comment",
+    "text": "&gt; Compiler devs never did anything &quot;unreasonable&quot;, they didn&#x27;t sit down and go &quot;mwahahaha we can exploit the heck out of UB to break everything!!!!&quot;<p>Many compiler devs are on record gleefully responding to bug reports with statements on the lines of &quot;your code has undefined behaviour according to the standard, we can do what we like with it, if you don&#x27;t like it write better code&quot;. Less so in recent years as they&#x27;ve realised this was a bad idea or at least a bad look, but in the &#x27;00s it was a normal part of the culture."
+  },
+  {
+    "id": 42397630,
+    "by": "killerstorm",
+    "parent": 42388100,
+    "time": 1733995528,
+    "type": "comment",
+    "text": "What stops compiler makers from treating UB as platform-specific behavior rather than as something which cannot happen?<p>&quot;You are not allowed to do this, and thus...&quot; reasoning assumes that programmers are language lawyers, which is unreasonable."
+  },
+  {
+    "id": 42389415,
+    "by": "meonukk",
+    "parent": 42388899,
+    "time": 1733934408,
+    "type": "comment",
+    "text": "Why is it allowed to eliminate the branch? In most architectures abs(INT_MIN) returns INT_MIN which is negative"
+  },
+  {
+    "id": 42394387,
+    "by": "robinsonb5",
+    "parent": 42388899,
+    "time": 1733960568,
+    "type": "comment",
+    "text": "&gt; value constraint pass that computes a set of possible values that a variable can hold<p>Surely that value constraint pass must be using reasoning based on UB in order to remove NULL from the set of possible values?<p>Being able to disable all such reasoning, then comparing the generated code with and without it enabled would be an excellent way to find UB-related bugs."
+  },
+  {
+    "id": 42392998,
+    "by": "gpderetta",
+    "parent": 42391889,
+    "time": 1733951323,
+    "type": "comment",
+    "text": "NOT-reasonable: expecting the compiler to read the programmer&#x27;s mind."
+  },
+  {
+    "id": 42393164,
+    "by": "bonzini",
+    "parent": 42388376,
+    "time": 1733952382,
+    "type": "comment",
+    "text": "Rep movsb copies 64K if CX=0 (that&#x27;s actually very useful), but memcpy could be implemented as two instructions:<p><pre><code>    jcxz skip \n    rep movsb\n    skip:</code></pre>"
+  },
+  {
+    "id": 42387767,
+    "by": "frabert",
+    "parent": 42387554,
+    "time": 1733925831,
+    "type": "comment",
+    "text": "AFAIK, something having undefined behavior in the spec does not prevent an implementation- (platform-)specific behavior being defined.<p>As to your point about checks being erased, that generally happens when the checks happen too late (according to the compiler), or in a wrong way. For example, checking that `src` is not NULL _after_ memcpy(sec, dst, 0) is called. Or, checking for overflow by doing `if(x+y&lt;0) ...` when x and y are nonnegative signed ints."
+  },
+  {
+    "id": 42390149,
+    "by": "poincaredisk",
+    "parent": 42387531,
+    "time": 1733937569,
+    "type": "comment",
+    "text": "I disagree with your premise. C was designed to be a high level (for its time) language, abstracted from actual hardware<p>&gt;It&#x27;s pretty much a tiny wrapper around assembler<p>Assebler has zero problem with adding &quot;null + 4&quot; or computing &quot;null-null&quot;. C does, because it&#x27;s not actually a tiny wrapper."
+  },
+  {
+    "id": 42388424,
+    "by": "wruza",
+    "parent": 42387531,
+    "time": 1733929422,
+    "type": "comment",
+    "text": "Not sure what your last remark means wrt everything else."
+  },
+  {
+    "id": 42393060,
+    "by": "gpderetta",
+    "parent": 42390732,
+    "time": 1733951718,
+    "type": "comment",
+    "text": "You can cast them to uintptr_t and compare them to your heart&#x27;s desire."
+  },
+  {
+    "id": 42387943,
+    "by": "shultays",
+    "parent": 42387641,
+    "time": 1733926934,
+    "type": "comment",
+    "text": "<p><pre><code>  However, given how low-level a language C++ is, we can actually break this assumption by setting i to y-x. Since &amp;x[i] is the same as x+i, this means we are actually writing 23 to &amp;y[0].\n</code></pre>\nBut that is undefined, you can&#x27;t do x + (y - x) ie a pointer arithmetic that ends outside of bounds of an array. Since it is undefined, shouldn&#x27;t C++ assume that changing x[..] can&#x27;t change y[0]<p>edit: welp, if I read a few more lines into article I would see that it also tells it is undefined"
+  },
+  {
+    "id": 42387968,
+    "by": "gpderetta",
+    "parent": 42387641,
+    "time": 1733927069,
+    "type": "comment",
+    "text": "to be clear, in my example the result of oracle() cannot possibly alias with &#x27;x&#x27; in C or C++ (and in fact gcc will optimize accordingly). In a different language where addresses are mere integers, things would be more complicated."
+  },
+  {
+    "id": 42388232,
+    "by": "wat10000",
+    "parent": 42387905,
+    "time": 1733928503,
+    "type": "comment",
+    "text": "That\u2019s the point. C allows this function to be optimized to always return 1. A \u201cpointers are addresses, just emit reads and writes and stop trying to be so clever\u201d version of C would require x to be spilled to the stack, then the write, then reload x and return whatever it contained."
+  },
+  {
+    "id": 42393993,
+    "by": "atq2119",
+    "parent": 42388130,
+    "time": 1733957913,
+    "type": "comment",
+    "text": "The point is that the C standard <i>does</i> guarantee that the function returns 1 if the program is a valid C program - which means there is no UB.<p>For example: If the oracle function returns an invalid pointer, then dereferencing that pointer is UB, and therefore the program isn&#x27;t a valid C program."
+  },
+  {
+    "id": 42388205,
+    "by": "wat10000",
+    "parent": 42388130,
+    "time": 1733928340,
+    "type": "comment",
+    "text": "A conforming C compiler is allowed to emit that function to perform the write and then return the constant 1. Should that be allowed?"
+  },
+  {
+    "id": 42388013,
+    "by": "gpderetta",
+    "parent": 42387772,
+    "time": 1733927326,
+    "type": "comment",
+    "text": "the literal 1 is not an object in C or C++ hence it does not have an address. If you meant &#x27;x&#x27;, then also no, oracle() can&#x27;t return the address of &#x27;x&#x27; because of pointer provenance rules."
+  },
+  {
+    "id": 42389023,
+    "by": "layer8",
+    "parent": 42388199,
+    "time": 1733932543,
+    "type": "comment",
+    "text": "That\u2019s currently the case in C, in that you can convert pointers to and from <i>uintptr_t</i>. However, not every number representable in that type needs to be valid memory (that\u2019s true on the assembly level as well), hence it\u2019s only defined for valid pointers."
+  },
+  {
+    "id": 42389028,
+    "by": "sixfiveotwo",
+    "parent": 42388199,
+    "time": 1733932551,
+    "type": "comment",
+    "text": "&gt; I think a memory address is a number that CPU considers to be a memory address<p>I meant to say that, indeed, there must be some concept of CPU for a memory address to have a meaning, and for this concept of CPU to be as widely applicable as possible, surely defining it as abstract as possible is the way to go. Ergo, the idea of a C abstract machine.<p>Anyway, other people in this thread are discussing the matter more accurately and in more details than I could hope to do, so I&#x27;ll leave it like that."
+  },
+  {
+    "id": 42390890,
+    "by": "davidt84",
+    "parent": 42390081,
+    "time": 1733941117,
+    "type": "comment",
+    "text": "No, it&#x27;s not.<p>Undefined behaviour is undefined behaviour whatever optimisation level you use.<p>Some -f flags may extend the C standard and remove undefined behaviour in some cases (e.g. strict aliasing, signed integer overflow, writable string constants, etc.)"
+  },
+  {
+    "id": 42395088,
+    "by": "lmm",
+    "parent": 42390168,
+    "time": 1733966155,
+    "type": "comment",
+    "text": "&gt; Many programmers also learned to the use tools available to write reasonably safe code in C.<p>And then someone compiled their code with a new compiler and got a security bug. This happens consistently. Every C programmer thinks their code is reasonably safe until someone finds a security bug in it. Many still think so afterwards."
+  },
+  {
+    "id": 42391030,
+    "by": "quotemstr",
+    "parent": 42390168,
+    "time": 1733941752,
+    "type": "comment",
+    "text": "&gt; safe code in C<p>You&#x27;re like a Japanese holdout in the 60s refusing to leave his bunker long after the war is over.<p>C lost. Memory safety is a huge boon for security. Human beings, even the best of them, cannot consistently write correct C code. (Look at OpenBSD.) You can keep fighting the war your side has already lost or you can move on."
+  },
+  {
+    "id": 42391005,
+    "by": "nemothekid",
+    "parent": 42390343,
+    "time": 1733941657,
+    "type": "comment",
+    "text": "&gt;<i>All of these &#x27;problems&#x27; have simple and straigtforward workarounds, I&#x27;m not convinced these UB are needed at all.</i><p>He gave you a simple and straightforward example, but that example may not be representative of a real world program where complex analysis leads to better performing code.<p>As a programmer, its far easier to just insert bounds checks everywhere, and trust the system to remove them when possible. This is what Rust does, and it safe. The problem isn&#x27;t the compiler, the problem is the standard. More broadly, the standard wasn&#x27;t written with optimizing compilers in mind."
+  },
+  {
+    "id": 42390474,
+    "by": "ncruces",
+    "parent": 42390343,
+    "time": 1733939105,
+    "type": "comment",
+    "text": "That&#x27;s a non solution for existing code that already calls GetPixel 20 million times.<p>It&#x27;s not like I&#x27;m saying C is the best possible way to write new code.<p>I&#x27;m just commenting why this matters for performance, and \u201cremove all undefined behavior&quot; from C compilers is a non-starter.<p>Now go write Rust for all I care."
+  },
+  {
+    "id": 42452284,
+    "by": "Arch-TK",
+    "parent": 42419216,
+    "time": 1734541083,
+    "type": "comment",
+    "text": "It doesn&#x27;t break existing code, unless you want to statically guarantee that it does not trigger UB, in which case it does. The point is that if you need an opt-in safe mode or annotations to express additional invariants then you can&#x27;t magically make existing code safe."
+  },
+  {
+    "id": 42396985,
+    "by": "pjmlp",
+    "parent": 42396712,
+    "time": 1733988066,
+    "type": "comment",
+    "text": "Now map the hours and days spent into actual money, being taken from project budget, and then you realise why some business prefer some languages over others."
+  },
+  {
+    "id": 42393610,
+    "by": "tialaramex",
+    "parent": 42393025,
+    "time": 1733955196,
+    "type": "comment",
+    "text": "Right, though I guess I wasn&#x27;t clear enough about that for the down voters, but whatever."
+  },
+  {
+    "id": 42410677,
+    "by": "mpweiher",
+    "parent": 42405527,
+    "time": 1734112219,
+    "type": "comment",
+    "text": "That\u2019s not at all the same thing."
+  },
+  {
+    "id": 42388454,
+    "by": "BenjiWiebe",
+    "parent": 42387908,
+    "time": 1733929597,
+    "type": "comment",
+    "text": "Doesn&#x27;t it take memory protection hardware to trap on a memory read?"
+  },
+  {
+    "id": 42389724,
+    "by": "david-gpu",
+    "parent": 42388444,
+    "time": 1733935731,
+    "type": "comment",
+    "text": "Yikes! I would love sipping coffee watching the chief architect chew up whoever suggested that. That sounds awful even on a microcontroller."
+  },
+  {
+    "id": 42389428,
+    "by": "actionfromafar",
+    "parent": 42388968,
+    "time": 1733934464,
+    "type": "comment",
+    "text": "First came the language, then a few years later they described it in a book."
+  },
+  {
+    "id": 42389305,
+    "by": "scoutt",
+    "parent": 42389140,
+    "time": 1733933821,
+    "type": "comment",
+    "text": "Oh... yes. You are right. My bad."
+  },
+  {
+    "id": 42390577,
+    "by": "sitzkrieg",
+    "parent": 42389140,
+    "time": 1733939576,
+    "type": "comment",
+    "text": "many do tho. i have targetted c89 and maybe c99 on several embedded devices"
+  },
+  {
+    "id": 42390059,
+    "by": "kllrnohj",
+    "parent": 42389058,
+    "time": 1733937123,
+    "type": "comment",
+    "text": "&gt; One could argue that &quot;optimizing based on signed overflow&quot; was an unreasonable step to take<p>That optimization allows using 64-bit registers &#x2F; offset loads for signed ints which it can&#x27;t do if it has to overflow, since that overflow must happen at 32-bits. That&#x27;s not an uncommon thing."
+  },
+  {
+    "id": 42390107,
+    "by": "uecker",
+    "parent": 42389058,
+    "time": 1733937399,
+    "type": "comment",
+    "text": "I started to like signed overflow rules, because it is really easy to find problems using sanitizers.<p>The strict aliasing rules are not violated by typical POSIX socket code as a cast to a different pointer type, i.e. `struct sockaddr` by itself is well-defined behavior. (and POSIX could of course just define something even if ISO C leaves it undefined, but I don&#x27;t think this is needed here)"
+  },
+  {
+    "id": 42401968,
+    "by": "kllrnohj",
+    "parent": 42397630,
+    "time": 1734028814,
+    "type": "comment",
+    "text": "<p><pre><code>    bool foo(some_struct* bar) {\n        if (bar-&gt;blah()) {\n            return true;\n        }\n        if (bar == nullptr) {\n            return false;\n        }\n        return true;\n    }\n</code></pre>\nCan the compiler eliminate that nullptr comparison in your opinion yes or no? While this example looks stupid, after inlining it&#x27;s quite plausible to end up with code in this type of a pattern. Dereferencing a nullptr is UB, and typically the &quot;platform-specific&quot; behavior is a crash, so... why should that if statement remain? And then if it can&#x27;t remain, why should an explicit `_Nonnull` assertion have different behavior than an explicit deref? What if the compiler can also independently prove that some_struct-&gt;blah() always evaluates to false, so it eliminates that entire branch - does the `if (bar == nullptr)` still need to remain in that specific case? If so, why? The code was the same in both cases, the compiler just got better at eliminating dead code."
+  },
+  {
+    "id": 42390028,
+    "by": "plorkyeran",
+    "parent": 42389415,
+    "time": 1733936972,
+    "type": "comment",
+    "text": "Calling abs(INT_MIN) on twos-complement machine is not allowed by the C standard. The behavior of abs() is undefined if the result would not fit in the return value."
+  },
+  {
+    "id": 42390301,
+    "by": "Sohcahtoa82",
+    "parent": 42389415,
+    "time": 1733938247,
+    "type": "comment",
+    "text": "I didn&#x27;t believe this so I looked it up, and yup.<p>Because of 2&#x27;s complement limitations, abs(INT_MIN) can&#x27;t actually be represented and it ends up returning INT_MIN."
+  },
+  {
+    "id": 42392993,
+    "by": "UncleMeat",
+    "parent": 42389415,
+    "time": 1733951300,
+    "type": "comment",
+    "text": "It&#x27;s possible that there is an edge case in the output bounds here. I&#x27;m just using it as an example.<p>Replace it with &quot;int x = foo() ? 1 : 2;&quot; if you want."
+  },
+  {
+    "id": 42399618,
+    "by": "UncleMeat",
+    "parent": 42394387,
+    "time": 1734015226,
+    "type": "comment",
+    "text": "There are many such constraints, and often ones that you want.<p>&quot;These two pointers returned from subsequent calls to malloc cannot alias&quot; is a value constraint that relies on UB. You are going to have a bad time if your compiler can&#x27;t assume this to be true and comparing two compilations with and without this assumption won&#x27;t be useful to you as a developer.<p>There <i>are</i> a handful of cases that people do seem to look at and say &quot;this one smells funny to me&quot;, even if we cannot articulate some formal reason why it feels okay for the compiler to build logical conclusions from one assumption and not another. Eliminating null checks that are &quot;dead&quot; because they are dominated by some operation that is illegal if performed on null is the most widely expressed example. Eliminating signed integral bounds checks by assuming that arithmetic operations are non-overflowing is another. Some compilers support explicitly disabling some (but not all) optimizations derived from deductions from these assumptions.<p>But if you generalize this to all UB you probably won&#x27;t end up with what you actually want."
+  },
+  {
+    "id": 42396756,
+    "by": "mjevans",
+    "parent": 42392998,
+    "time": 1733984919,
+    "type": "comment",
+    "text": "OK, you want a FORMAL version?<p>Acceptable UB: Do the exact same type of operation as for defined behavior, even if the result is defined by how the underlying hardware works.<p>NOT-acceptable UB: Perform some operation OTHER than the same as if it were the valid code path, EXCEPT: Failure to compile or a warning message stating which code has been transformed into what other operation as a result of UB."
+  },
+  {
+    "id": 42395838,
+    "by": "jbverschoor",
+    "parent": 42390149,
+    "time": 1733973112,
+    "type": "comment",
+    "text": "Not high-level..  Portable. Portable layer above assembler&#x2F;arch.<p>NULL doesn&#x27;t exist in assembler, and in C, NULL is only a defined as a macro. It&#x27;s not something built-in.<p>C doesn&#x27;t have any problems adding 4 to NULL nor subtracting NULL from NULL."
+  },
+  {
+    "id": 42388150,
+    "by": "codedokode",
+    "parent": 42387968,
+    "time": 1733928006,
+    "type": "comment",
+    "text": "The result of oracle can point to anything if you write it as return (int *)rand();<p>Note that rand() returns 32-bit value so you have to call it twice and merge the results to obtain a 64-bit pointer."
+  },
+  {
+    "id": 42390275,
+    "by": "cv5005",
+    "parent": 42388232,
+    "time": 1733938106,
+    "type": "comment",
+    "text": "Then use the register keyword or just reword the standard to assume the register behavior if a variables address hasn&#x27;t been taken.<p>The majority of useful optimizations can be kept in a &quot;Sane C&quot; with either code style changes (cache stuff in local vars to avoid aliasing for example) or with minor tweaks to the standard."
+  },
+  {
+    "id": 42395512,
+    "by": "uecker",
+    "parent": 42395088,
+    "time": 1733970071,
+    "type": "comment",
+    "text": "There are couple of cases where compiler optimizations caused security issues, but that this happens all the time is a huge exaggeration. And many of the practically relevant cases can be avoided by using tools such as UBSan. The actual practical issue in C is people getting their pointer arithmetic wrong, which can also be avoided by having safe abstractions for buffer and string handling.<p>The other fallacy is that these issue then suddenly would disappear when using Rust, which is also not the case. Because the programmer cutting corners in C or prioritizing performance over safety will also use Rust &quot;unsafe&quot; carelessly.<p>Rust has a clear advantage for temporal memory safety. But it is also possible to have a clear strategy about what data structure owns what other object in C."
+  },
+  {
+    "id": 42391604,
+    "by": "uecker",
+    "parent": 42391030,
+    "time": 1733944635,
+    "type": "comment",
+    "text": "Well, memory safety is great but it seems Rust programmers also manage to create memory safety issues just fine:<p><a href=\"https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0401.html\" rel=\"nofollow\">https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0401.html</a>\n<a href=\"https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0400.html\" rel=\"nofollow\">https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0400.html</a>\n<a href=\"https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0377.html\" rel=\"nofollow\">https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0377.html</a>\n<a href=\"https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0374.html\" rel=\"nofollow\">https:&#x2F;&#x2F;rustsec.org&#x2F;advisories&#x2F;RUSTSEC-2024-0374.html</a>\netc."
+  },
+  {
+    "id": 42392941,
+    "by": "ryao",
+    "parent": 42391030,
+    "time": 1733950978,
+    "type": "comment",
+    "text": "Use a sound static analyzer like astree and you can produce memory safe C code:<p><a href=\"https:&#x2F;&#x2F;www.absint.com&#x2F;astree&#x2F;index.htm\" rel=\"nofollow\">https:&#x2F;&#x2F;www.absint.com&#x2F;astree&#x2F;index.htm</a><p>Note that the key word here is sound. The more common static analyzers are unsound tools that will miss cases. Sound tools do not, but few people know of them, they are rare and they are typically proprietary and expensive."
+  },
+  {
+    "id": 42453178,
+    "by": "uecker",
+    "parent": 42452284,
+    "time": 1734545667,
+    "type": "comment",
+    "text": "A lot of existing code is already safe.  You can&#x27;t prove all (or even most) existing code safe automatically.  This is also true for Rust if you do not narrowly define safe as memory safe.  You could transform a lot of C code to be memory safe by adding annotations and do some light refactoring and maybe pushing some residual pieces to &quot;unsafe&quot; blocks. This would be very similar to Rust."
+  },
+  {
+    "id": 42411432,
+    "by": "UncleMeat",
+    "parent": 42410677,
+    "time": 1734117382,
+    "type": "comment",
+    "text": "What is the difference between &quot;writing past the end of an array is UB&quot; and &quot;dereferencing a null pointer is UB&quot; and &quot;passing null as the destination argument to memcpy is UB&quot;? The two programs I listed above are only observationally equivalent if writing past the end of valid allocations is UB.<p>A core problem with this discussion in almost all circumstances is that people have a vibe for which of these things it feels okay for a compiler to make logical deductions from and which it feels not okay but if you actually sit down and try to formalize this in a way that would be meaningful to compiler vendors, you can&#x27;t."
+  },
+  {
+    "id": 42395803,
+    "by": "lmm",
+    "parent": 42388454,
+    "time": 1733972709,
+    "type": "comment",
+    "text": "As a philosophical matter, by definition that would be memory protection hardware, sure. But the point is that it&#x27;s at least conceivable that some platforms might have some crude, hardwired memory protection without having a full MMU."
+  },
+  {
+    "id": 42393133,
+    "by": "bonzini",
+    "parent": 42389724,
+    "time": 1733952195,
+    "type": "comment",
+    "text": "On s390 the memory at address 0 (low core) has all sorts of important stuff. Of course s390 has paging enabled pretty much always but still..."
+  },
+  {
+    "id": 42393620,
+    "by": "colejohnson66",
+    "parent": 42389724,
+    "time": 1733955242,
+    "type": "comment",
+    "text": "AVR\u2019s registers are mapped to address 0. So reading and writing NULL is actually modifying r0."
+  },
+  {
+    "id": 42390755,
+    "by": "vlovich123",
+    "parent": 42390577,
+    "time": 1733940402,
+    "type": "comment",
+    "text": "They cross compile. No one is compiling code on these machines."
+  },
+  {
+    "id": 42390751,
+    "by": "0xffff2",
+    "parent": 42390577,
+    "time": 1733940375,
+    "type": "comment",
+    "text": "But you&#x27;re running the compiler on the device rather than cross-compile?"
+  },
+  {
+    "id": 42395590,
+    "by": "Narishma",
+    "parent": 42390577,
+    "time": 1733970712,
+    "type": "comment",
+    "text": "I doubt you&#x27;re running C compilers on those devices."
+  },
+  {
+    "id": 42414850,
+    "by": "LegionMammal978",
+    "parent": 42390107,
+    "time": 1734153351,
+    "type": "comment",
+    "text": "&gt; The strict aliasing rules are not violated by typical POSIX socket code as a cast to a different pointer type, i.e. `struct sockaddr` by itself is well-defined behavior.<p>Basically all usage of sendmsg() and recvmsg() with a static char[N] buffer is UB, is one big example I&#x27;ve run into. Unless you memcpy every value into and out of the buffer, which literally no one does. Also, reading sa_family from the output of accept() (or putting it into a struct sockaddr_storage and reading ss_family) is UB, unless you memcpy it out, which literally no one does."
+  },
+  {
+    "id": 42396667,
+    "by": "ryao",
+    "parent": 42390028,
+    "time": 1733983822,
+    "type": "comment",
+    "text": "Where does it say that? I thought this was a famous example from formal methods showing why something really simple could be wrong. It would be strange for the standard to say to ignore it. The behavior is also well defined in two\u2019s complement. People just don\u2019t like it."
+  },
+  {
+    "id": 42397847,
+    "by": "gpderetta",
+    "parent": 42396756,
+    "time": 1733997785,
+    "type": "comment",
+    "text": "I don&#x27;t understand, if the operation is not defined, what exactly the compiler should do?<p>If I tell you &quot;open the door&quot;, that implies that the door is there. If the door is not there, how would you still open the door?<p>Concretely, what do you expect this to return:<p><pre><code>  #include &lt;cstddef&gt;\n  void sink(ptrdiff_t);\n  ptrdiff_t source();\n\n  int foo() {    \n    int x = 1;\n    int y;\n    sink(&amp;y-&amp;x);\n    *(&amp;y - source()) = 42;\n    return x;\n  }\n</code></pre>\nassuming that source() returns the parameter passed to sink()?<p>Incidentally I had to launder the offset through sink&#x2F;source, because GCC has a must-alias oracle to mitigate miscompiling some UB code, so in a way it already caters to you."
+  },
+  {
+    "id": 42396602,
+    "by": "teo_zero",
+    "parent": 42395838,
+    "time": 1733982886,
+    "type": "comment",
+    "text": "&gt; C doesn&#x27;t have any problems adding 4 to NULL nor subtracting NULL from NULL.<p>&quot;Having problems&quot; is not a fair description of what&#x27;s at stake here. The C standard simply says that it doesn&#x27;t guarantee that such operations give the results that you expect.<p>Also please note that the article and this whole thread is about the <i>address</i> zero, not about the <i>number</i> zero. If NULL is #defined as 0 in your implementation and you use it in an expression only involving integers, of course no UB is triggered."
+  },
+  {
+    "id": 42395898,
+    "by": "jbverschoor",
+    "parent": 42395838,
+    "time": 1733973722,
+    "type": "comment",
+    "text": "<p><pre><code>  #include &lt;stddef.h&gt;\n  int main() {\n    if (NULL + 4) {}\n    if (NULL - NULL) {}\n    return 0;\n  }</code></pre>"
+  },
+  {
+    "id": 42388220,
+    "by": "gpderetta",
+    "parent": 42388150,
+    "time": 1733928432,
+    "type": "comment",
+    "text": "The numerical value returned by oracle might physically match the address of  the stack slot for &#x27;x&#x27;, assuming that it exists, but it doesn&#x27;t mean that, from a language point of view, it is a valid pointer.<p>If forging pointers had defined behaviour, it would be impossible to use the language sanely or perform any kind of optimization."
+  },
+  {
+    "id": 42390366,
+    "by": "wat10000",
+    "parent": 42390275,
+    "time": 1733938613,
+    "type": "comment",
+    "text": "Register behavior is what you want essentially all of the time. So we\u2019d just have to write `register` all over the place for no gain.<p>\u201cDon\u2019t optimize this, read and write it even if you think it\u2019s not necessary\u201d is a very rare case so it shouldn\u2019t be the default. If you want it, use the volatile keyword.<p>There\u2019s no need to reword the standard to assume the register behavior if the variable\u2019s address hasn\u2019t been taken. That\u2019s already how it works. In this example, if you escape the value of `&amp;x`, it\u2019s not legal to optimize this function to always return 1."
+  },
+  {
+    "id": 42396304,
+    "by": "lmm",
+    "parent": 42395512,
+    "time": 1733978681,
+    "type": "comment",
+    "text": "&gt; And many of the practically relevant cases can be avoided by using tools such as UBSan.<p>&quot;can be&quot;, but aren&#x27;t.<p>&gt; The other fallacy is that these issue then suddenly would disappear when using Rust, which is also not the case. Because the programmer cutting corners in C or prioritizing performance over safety will also use Rust &quot;unsafe&quot; carelessly.<p>The vast majority of these programmers aren&#x27;t making a deliberate choice at all though. They pick C because they heard it&#x27;s fast, they write it in the way that the language nudges them towards, or the way that they see done in libraries and examples, and they end up with unsafe code. Sure, someone can deliberately choose unsafe in Rust, but defaults matter.<p>&gt; it is also possible to have a clear strategy about what data structure owns what other object in C.<p>Is it though? How can one distinguish a codebase that does from a codebase that doesn&#x27;t? Other than the expensive static analysis tool mentioned elsewhere in the thread (at which point you&#x27;re not really writing &quot;C&quot;), I&#x27;ve never seen a way that worked and was distinguishable from the ways that don&#x27;t work."
+  },
+  {
+    "id": 42392235,
+    "by": "whytevuhuni",
+    "parent": 42391604,
+    "time": 1733947551,
+    "type": "comment",
+    "text": "I think the first one, stack overflow, is technically not a memory safety issue, just denial-of-service on resource exhaustion. Stack overflow is well defined as far as I know.<p>The other three are definitely memory safety issues."
+  },
+  {
+    "id": 42393848,
+    "by": "quotemstr",
+    "parent": 42392941,
+    "time": 1733956830,
+    "type": "comment",
+    "text": "Sure. I&#x27;m also a big fan of what Microsoft has done with SAL. And of course you have formally proven C, as used in seL4. I&#x27;d say that the contortions you have to go through to write code with these systems takes you out of the domain of &quot;C&quot; and into a domain of a different, safer language merely resembling C. Such a language might be a fine tool! But it&#x27;s not arbitrary C."
+  },
+  {
+    "id": 42466447,
+    "by": "Arch-TK",
+    "parent": 42453178,
+    "time": 1734647656,
+    "type": "comment",
+    "text": "&gt; A lot of existing code is already safe.<p>Again, I am not trying to argue either way. The point I was making was about how you can&#x27;t define away all UB in the C standard without needing to modify the language in a breaking way.<p>&gt; You can&#x27;t prove all (or even most) existing code safe automatically.<p>No but rust provides a proper type system which goes a long way to being able to prove and enforce a lot more about program behavior at compile time.<p>&gt; You could transform a lot of C code to be memory safe by adding annotations and do some light refactoring and maybe pushing some residual pieces to &quot;unsafe&quot; blocks. This would be very similar to Rust.<p>It would only be somewhat similar to super basic entry level rust which ignores all the opportunities for type checking."
+  },
+  {
+    "id": 42463655,
+    "by": "mpweiher",
+    "parent": 42411432,
+    "time": 1734629086,
+    "type": "comment",
+    "text": "You are still completely missing the point.<p>This example is not &quot;I know that UB doesn&#x27;t happen, therefore ...&quot;, which is what the memcpy() case is.<p>It is &quot;I don&#x27;t <i>care</i> that UB might happen, I am going to act as if it didn&#x27;t.  If the UB then makes the program behave differently than without the UB, that&#x27;s not my problem&quot;.<p>Which, incidentally, is one of the suggested&#x2F;permitted responses to UB in the standards text (that was made non-binding)."
+  },
+  {
+    "id": 42393778,
+    "by": "formerly_proven",
+    "parent": 42393620,
+    "time": 1733956257,
+    "type": "comment",
+    "text": "AVR\u2019s r0 is also a totally normal register, unlike most other RISC which typically have r0 == 0."
+  },
+  {
+    "id": 42419321,
+    "by": "uecker",
+    "parent": 42414850,
+    "time": 1734209130,
+    "type": "comment",
+    "text": "Using a static char buffer would indeed UB but we just made the change to C2Y that this ok (and in practice it always was).  Incorrect use of sockaddr_storage may lead to UB.  But again, most socket code I see is actually correct."
+  },
+  {
+    "id": 42412817,
+    "by": "plorkyeran",
+    "parent": 42396667,
+    "time": 1734127932,
+    "type": "comment",
+    "text": "<a href=\"https:&#x2F;&#x2F;busybox.net&#x2F;~landley&#x2F;c99-draft.html#7.20.6.1\" rel=\"nofollow\">https:&#x2F;&#x2F;busybox.net&#x2F;~landley&#x2F;c99-draft.html#7.20.6.1</a><p>&quot;The abs, labs, and llabs functions compute the absolute value of an integer j. If the result cannot be represented, the behavior is undefined. (242)&quot;<p>242 The absolute value of the most negative number cannot be represented in two&#x27;s complement."
+  },
+  {
+    "id": 42404556,
+    "by": "mjevans",
+    "parent": 42397847,
+    "time": 1734046753,
+    "type": "comment",
+    "text": "Evaluated step by step...<p>Offhand, *sink(&amp;y-&amp;x);* the compiler is not _required_ to lay out variables adjacently.  So the computation of the pointers fed to sink does not have to be defined and might not be portable.<p>It would be permissible for the compiler to refuse to compile that (&#x27;line blah, op blah&#x27; does not conform the the standard&#x27;s allowed range of behavior).<p>It would also be permissible to just allow that operation to happen.  It&#x27;s the difference of two pointer sized units being passed.  That&#x27;s the operation the programmer wrote, that&#x27;s the operation that will happen.  Do not verify bounds or alter behavior because the compiler could calculate that the value happens to be PTRMAX-sizeof(int)+1 (it placed X and Y in reverse of how a naive assumption might assume).<p>The = 42 line might write to any random address in memory.  Again, just compile the code to perform the operation.  If that happens to write 42 somewhere in the stack frame that leads to the program corrupting &#x2F; a segfault that&#x27;s fine.  If the compiler says &#x27;wait that&#x27;s not a known memory location&#x27; or &#x27;that&#x27;s going to write onto the protected stack!&#x27; it can ALSO refuse to compile and say why that code is not valid.<p>I would expect valid results to be a return of: 42, 1 (possibly with a warning message about undefined operations and the affected lines), OR the program does not compile and there is an error message which says what&#x27;s wrong."
+  },
+  {
+    "id": 42402156,
+    "by": "uecker",
+    "parent": 42396304,
+    "time": 1734029893,
+    "type": "comment",
+    "text": "&gt; &gt; And many of the practically relevant cases can be avoided by using tools such as UBSan.<p>&gt; &quot;can be&quot;, but aren&#x27;t.<p>It is a possible option when one needs improved safety, and IMHO often\nthe better option than using Rust.<p>&gt; &gt; The other fallacy is that these issue then suddenly would disappear when using Rust, which is also not the case. Because the programmer cutting corners in C or prioritizing performance over safety will also use Rust &quot;unsafe&quot; carelessly.<p>&gt; The vast majority of these programmers aren&#x27;t making a deliberate choice at all\n&gt; though. They pick C because they heard it&#x27;s fast, they write it in the way that the\n&gt; language nudges them towards, or the way that they see done in libraries and examples, &gt; and they end up with unsafe code. Sure, someone can deliberately choose unsafe in\n&gt; Rust, but defaults matter.<p>The choice of handcoding some low-level string manipulation is similar to the choice of using unsafe rust. One can do it or not. There is certainly a better security culture in Rust at this time, but it is unclear to what extend this will be true in the long run. Also C security culture  improves too and Rust culture will certainly deteriorate when usage spreads from highly motivated early adopters to the masses.<p>&gt; &gt; it is also possible to have a clear strategy about what data structure owns what other object in C.<p>&gt; Is it though? How can one distinguish a codebase that does from a\n&gt; codebase that doesn&#x27;t?<p>This leads to the argument that it is trivial to see unsafe code in Rust because it is marked &quot;unsafe&quot; and just a small amount of code while in C you would need to look at everything.  But this largely a theoretical argument: In practice you need to do some quality control for all code anyway, because memory safety is just\na small piece of overall the puzzle. (and even for memory safety, you also need to look at the code surrounding code in RUst.)  In practice, it is not  hard to recognize the C code which is dangerous, it is the one where pointer  arithmetic and string manipulation  is not encapsulated in safe interfaces and it is the code where ownership of pointers is not clear.<p>&gt;Other than the expensive static analysis tool mentioned elsewhere in the thread (at which point you&#x27;re not really writing &quot;C&quot;), I&#x27;ve never seen a way that worked and was distinguishable from the ways that don&#x27;t work.<p>I see some very high quality C code with barely any memory safety problems. Expensive static analysis can be used when no mistakes are acceptable, but then you should also formally verify the unsafe code in Rust."
+  },
+  {
+    "id": 42393158,
+    "by": "ryao",
+    "parent": 42392235,
+    "time": 1733952324,
+    "type": "comment",
+    "text": "I would consider a stack overflow to be a memory safety issue. The C++ language authors likely would too. C++ famously refused to support variable length stack allocated arrays because of memory safety concerns. In specific, they were worried that code at runtime would make an array so big so big that it would jump the OS guard page, allowing access to unallocated memory that of course is not noticed ahead of time during development. This is probably easy to do unintentionally if you have more stack variables after an enormous stack allocated array and touch them before you touch the array. The alternative is to force developers to use compiler extensions such as alloca(). That makes it easy to pass pointers outside of the stack frame where they are valid and is a definite safety issue. The C++ nitpicking over variable length arrays is silly since it gives us a status quo where C++ developers use alloca() anyway, but it shows that stack overflows are considered a memory safety issue."
+  },
+  {
+    "id": 42392255,
+    "by": "quotemstr",
+    "parent": 42392235,
+    "time": 1733947614,
+    "type": "comment",
+    "text": "C++ is a better unsafe language than unsafe Rust, IMHO. The thing about the social dynamic of Rust, though, is that it keeps unsafe code to a minimum."
+  },
+  {
+    "id": 42395397,
+    "by": "uecker",
+    "parent": 42392235,
+    "time": 1733969089,
+    "type": "comment",
+    "text": "I agree that one shouldn&#x27;t have been included.  My favorite ones aren&#x27;t included here anyway, e.g. how a Rust programmer managed to create a safety issue in a matrix transpose or how the messed up str::repeat in their standard library.<p>And don&#x27;t get me wrong. I think Rust is as safer language in C. Just the idea that C is completely unsafe and it is impossible even for experts to write reasonable safe code while it is completely impossible in Rust to create an issue is just a lot of nonsense. In reality, it is possible to screw up in both languages and people do this, and reality is that safety in Rust is only somewhat better when compared to C with good security practices. But this is not how it is presented. I also think the difference will become even smaller when C safety continues to improve as it did in the last years due to better tooling while Rust is being picked up by average programmers under time pressure who will use &quot;unsafe&quot; just as carelessly as they carelessly hand-roll pointer arithmetic in C today."
+  },
+  {
+    "id": 42395819,
+    "by": "uecker",
+    "parent": 42393848,
+    "time": 1733972925,
+    "type": "comment",
+    "text": "Note that my original comment above was &quot;reasonably safe&quot; and not &quot;perfectly memory safe&quot;. You can formally prove something with a lot of effort, but you can also come reasonably close for practical purposes with a lot less effort and more commonly available tools.<p>You are right that &quot;arbitrary C&quot; is not safe while safe Rust is safe, but this is mostly begging the question. The question is what can you do with the language depending on your requirements. If you need safe C this doable with enough effort, if you need reasonably safe C this is even practical in most projects, and all this should be compared to Rust as used in a similar situation which very well may include use of unsafe Rust or C libraries which may also limit the safety."
+  },
+  {
+    "id": 42396629,
+    "by": "ryao",
+    "parent": 42393848,
+    "time": 1733983236,
+    "type": "comment",
+    "text": "It is C. It is just written with the aid of formal methods. It would be nice if all software were written that way. That said, if you want another language \u201cresembling C\u201d, there is always WUFFS:<p><a href=\"https:&#x2F;&#x2F;github.com&#x2F;google&#x2F;wuffs\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;google&#x2F;wuffs</a><p>The output of the WUFFS compiler certainly resembles C because it is C."
+  },
+  {
+    "id": 42468955,
+    "by": "uecker",
+    "parent": 42466447,
+    "time": 1734678855,
+    "type": "comment",
+    "text": "&gt; &gt; A lot of existing code is already safe.<p>&gt; Again, I am not trying to argue either way. The point I was making was about how you can&#x27;t define away all UB in the C standard without needing to modify the language in a breaking way.<p>This depends on how you define &quot;breaking&quot;. I think one can add annotations and transform a lot of C code to memory safe C with slight refactoring without introducing changes into the language that would break any existing code.  You can not simply switch on a flag make existing code safe ... except you can do this too ... it just then comes with a high run-time cost for checking.<p>&gt; &gt; &gt; No but rust provides a proper type system which goes a long way to being able to prove and enforce a lot more about program behavior at compile time.<p>&gt; &gt; You could transform a lot of C code to be memory safe by adding annotations and do some light refactoring and maybe pushing some residual pieces to &quot;unsafe&quot; blocks. This would be very similar to Rust.<p>&gt; It would only be somewhat similar to super basic entry level rust which ignores all the opportunities for type checking.<p>I do not believe you can solve a lot more issues with strong typing than you can already solve in C simply by building good abstractions."
+  },
+  {
+    "id": 42395038,
+    "by": "david-gpu",
+    "parent": 42393778,
+    "time": 1733965572,
+    "type": "comment",
+    "text": "Thanks for saving me a search, because I was expecting r0 to be hardcoded to zero.<p>Sometimes hardware is designed with insufficient input from software folks and the result is something asinine like that. That, or some people like watching the world burn."
+  },
+  {
+    "id": 42409262,
+    "by": "gpderetta",
+    "parent": 42404556,
+    "time": 1734103479,
+    "type": "comment",
+    "text": "&amp;y-&amp;x doesn&#x27;t require the variables to adjacent, just to exist in the same linear address space. It doesn&#x27;t even imply any specific ordering .<p>&gt; Again, just compile the code to perform the operation. If that happens to write 42 somewhere in the stack frame that leads to the program corrupting &#x2F; a segfault that&#x27;s fine. If the compiler says &#x27;wait that&#x27;s not a known memory location&#x27; or &#x27;that&#x27;s going to write onto the protected stack!<p>As far as the compiler is concerned, source() could return 0 and the line be perfectly defined, so there is no reason to produce an error. In fact as far as the compiler is concerned 0 is the only valid value that source could return, so that line can only be writing to y. As that variable is a local variable that going out of scope, the compiler omits the store. Or you also believe that dead store elimination is wrong?<p>&gt; possibly with a warning message about undefined operations and the affected lines<p>There is no definitely undefined operation in my example; there can be UB depending on the behaviour of externally compiled functions, but that&#x27;s true of almost any C++ statement.<p>What most people in the &quot;compiler must warn about UB&quot; camp fail to realize, is that 99.99% of the time the complier has no way of realizing some code is likely to cause UB: From the compiler point of view my example is perfectly standard compliant [1], UB comes only from the behaviour of source and sink that are not analysable by the compiler.<p>[1] technically to be fully conforming the code should cast the pointers to uintptr_t before doing the subtraction."
+  },
+  {
+    "id": 42405808,
+    "by": "lmm",
+    "parent": 42402156,
+    "time": 1734062248,
+    "type": "comment",
+    "text": "&gt; The choice of handcoding some low-level string manipulation is similar to the choice of using unsafe rust. One can do it or not.<p>But most of the time programmers don&#x27;t make a conscious choice at all. So opt-out unsafety versus opt-in unsafety is a huge difference.<p>&gt; In practice you need to do some quality control for all code anyway, because memory safety is just a small piece of overall the puzzle.<p>Memory safety is literally more than half of real-world security issues.<p>&gt; In practice, it is not hard to recognize the C code which is dangerous<p>&gt; I see some very high quality C code with barely any memory safety problems<p>I hear a lot of C people saying this sort of thing, but they never make it concrete - there&#x27;s no list of which popular open-source libraries are dangerous and which are not, it&#x27;s only after a vulnerability is discovered that we hear &quot;oh, that project always had poor quality code&quot;. If I pick a random library to maybe use in my project (even big-name ones e.g. libpq or libtiff), no-one can ever actually answer whether that&#x27;s high quality C code or low quality C code, or give me a simple algorithm that I can actually apply without having to read a load of code and make a subjective judgement. Whereas I don&#x27;t have to read or judge anything or even properly know rust to do &quot;how much of this rust code is unsafe&quot;."
+  },
+  {
+    "id": 42393426,
+    "by": "whytevuhuni",
+    "parent": 42393158,
+    "time": 1733954105,
+    "type": "comment",
+    "text": "In the general case, I think you might be right, although it&#x27;s a bit mitigated by the fact that Rust does not have support for variable length arrays, alloca, or anything that uses them, in the standard library. As you said though, it&#x27;s certainly possible.<p>I was more referring to that specific linked advisory, which is unlikely to use either VLAs or alloca. In that case, where stack overflow would be caused by recursion, a guard frame will always be enough to catch it, and will result in a safe abort [0].<p>[0] <a href=\"https:&#x2F;&#x2F;github.com&#x2F;rust-lang&#x2F;rust&#x2F;pull&#x2F;31333\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;rust-lang&#x2F;rust&#x2F;pull&#x2F;31333</a>"
+  },
+  {
+    "id": 42395646,
+    "by": "uecker",
+    "parent": 42392255,
+    "time": 1733971255,
+    "type": "comment",
+    "text": "This may be true, but the minimum unsafe code still seems not that small. Maybe I just had bad luck, but one of the first things I looked at more closely was an implementation of a matrix transpose in Rust (as an example of something relevant to my problem domain) and that directly used unsafe Rust to be reasonably fast and then already had a CVE. This was a revealing experience because was just the same type of bug you might have had in similar C code, but in a language where countless people insist that this &quot;can not happen&quot;."
+  },
+  {
+    "id": 42420693,
+    "by": "lmm",
+    "parent": 42396629,
+    "time": 1734224708,
+    "type": "comment",
+    "text": "&gt; It is C. It is just written with the aid of formal methods.<p>It is not C in the sense that many of the usual reasons to use C no longer apply. E.g. a common reason to use C is the availability of libraries, but most popular libraries will not pass that analyser so you can&#x27;t use them if you&#x27;re depending on that analyser. E.g. a common reason to use C is standard tooling for e.g. automated refactoring, but will those standard tools preserve analyser-passing? Probably not."
+  },
+  {
+    "id": 42476395,
+    "by": "Arch-TK",
+    "parent": 42468955,
+    "time": 1734739697,
+    "type": "comment",
+    "text": "&gt; You can not simply switch on a flag make existing code safe ... except you can do this too ... it just then comes with a high run-time cost for checking.<p>I don&#x27;t think you can reasonably implement this even at a high runtime cost without breaking programs. Either way, you&#x27;ve managed to re-state the crux of my argument.<p>&gt; I do not believe you can solve a lot more issues with strong typing than you can already solve in C simply by building good abstractions.<p>Then I don&#x27;t think you have much familiarity with strong typing or are underestimating the performance impact of equivalently &quot;safe&quot; (in a broader sense than what rust uses the term for) abstractions in C.<p>The only way to get equivalent performance while maintaining the same level of guarantees in C is to generate C code, at which point you&#x27;re definitely better off using another programming language."
+  },
+  {
+    "id": 42414854,
+    "by": "mjevans",
+    "parent": 42409262,
+    "time": 1734153410,
+    "type": "comment",
+    "text": "I&#x27;m not familiar with the stack-like functions mentioned, but that is indeed something it should NOT eliminate.<p>In fact, the compiler should not eliminate &#x27;dead stores&#x27;.  That should be a warning (and emit the code) OR an error (do not emit a program).<p>The compiler should inform the programmer so the PROGRAM can be made correct.  Not so it&#x27;s particular result can be faster."
+  },
+  {
+    "id": 42419547,
+    "by": "uecker",
+    "parent": 42405808,
+    "time": 1734211383,
+    "type": "comment",
+    "text": "&gt; &gt; The choice of handcoding some low-level string manipulation is similar to the choice of using unsafe rust. One can do it or not.<p>&gt; But most of the time programmers don&#x27;t make a conscious choice at all. So opt-out unsafety versus opt-in unsafety is a huge difference.<p>I don&#x27;t think so. A programmer being careless will be careless with Rust &quot;unsafe&quot; too.<p>Don&#x27;t get me wrong, I think marking code without guaranteed memory safety is a good idea. I just don&#x27;t think it is a fundamental game changer.<p>&gt; &gt; In practice you need to do some quality control for all code anyway, because memory safety is just a small piece of overall the puzzle.<p>&gt; Memory safety is literally more than half of real-world security issues.<p><a href=\"https:&#x2F;&#x2F;www.horizon3.ai&#x2F;attack-research&#x2F;attack-blogs&#x2F;analysis-of-2023s-known-exploited-vulnerabilities\" rel=\"nofollow\">https:&#x2F;&#x2F;www.horizon3.ai&#x2F;attack-research&#x2F;attack-blogs&#x2F;analysi...</a><p>But I think even this is likely overstating it by looking at CVEs and not real world impact.<p>&gt; &gt; &gt; In practice, it is not hard to recognize the C code which is dangerous<p>&gt; &gt; I see some very high quality C code with barely any memory safety problems<p>&gt; I hear a lot of C people saying this sort of thing, but they never make it\n&gt; concrete - there&#x27;s no list of which popular open-source libraries are dangerous\n&gt; and which are not, it&#x27;s only after a vulnerability is discovered that we hear\n&gt; &quot;oh, that project always had poor quality code&quot;. If I pick a random library\n&gt; to maybe use in my project (even big-name ones e.g. libpq or libtiff), no-one\n&gt; can ever actually answer whether that&#x27;s high quality C code or low quality C code\n&gt;  or give me a simple algorithm that I can actually apply without having to read\n&gt; a load of code and make a subjective judgement. Whereas I don&#x27;t have to read or\n&gt; judge anything or even properly know rust to do &quot;how much of this rust code is unsafe&quot;.<p>So you look at all the 300 unmaintained dependencies a typical Rust projects pulls in via cargo and look at all the &quot;unsafe&quot; blocks to screen it?  Seriously, the issue is lack of open-source man power and this will hit Rust very hard once the ecosystem gets larger and this goes even more beyond the highly motivated first adopters.   I would be more tempted to buy this argument if Rust would have no &quot;unsafe&quot; and I could pull in arbitrary code from anywhere and be safe.  And this idea existed before with managed languages...  Safe Java in the browser and so.  Also sounded plausible but was similarly highly exaggerated as the Rust story."
+  }
+]

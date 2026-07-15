@@ -1,0 +1,13 @@
+memory_lab
+memory_lab.exe
+memory_lab_check
+memory_lab_check.exe
+*.o
+*.obj
+zig-cache/
+.zig-cache/
+__pycache__/
+*.pyc
+*.tmp
+/results_norm.json
+/results_regen/
